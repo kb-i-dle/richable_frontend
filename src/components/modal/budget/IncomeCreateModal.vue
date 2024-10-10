@@ -45,6 +45,22 @@
           </div>
         </div>
 
+        <!-- 계좌 선택 -->
+        <div class="mb-3" style="display: flex">
+          <label
+            for="selectAccount"
+            class="form-label"
+            style="font-weight: bold; width: 70px; padding-top: 8px"
+            >계좌</label
+          >
+          <select class="form-select" id="selectAccount" v-model="selectedAccount">
+            <option value="" disabled>계좌를 선택하세요</option>
+            <option v-for="account in accounts" :key="account.index" :value="account.accountNum">
+              {{ account.orgCode }} - {{ account.accountNum }} - {{ account.prodName }}
+            </option>
+          </select>
+        </div>
+
         <div class="modal-footer d-flex justify-content-between">
           <button type="button" class="btn" data-bs-dismiss="modal"
             style="background-color: white; border: 1px solid #020202; color: #020202; font-weight: bold; margin-right: 12px; width: 62px;">
@@ -63,6 +79,7 @@
 import { ref, onMounted, defineExpose } from 'vue';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
+import axiosInstance from '@/AxiosInstance'
 
 // 모달 초기화 변수
 const modal = ref(null);
@@ -74,6 +91,8 @@ const incomeDate = ref('');       // 소득 날짜
 const incomeAmount = ref('');     // 소득 가격
 const incomeContent = ref('');    // 소득 내용
 const incomeMemo = ref('');       // 소득 메모
+const accounts = ref([])
+const selectedAccount = ref(0)
 
 // 모달 열기 함수
 const show = () => {
@@ -87,6 +106,18 @@ const show = () => {
     modalInstance.show();
   }
 };
+const fetchAccounts = async () => {
+  try {
+    const response = await axiosInstance.get('/asset/account/list')
+    if (response.data.success) {
+      accounts.value = response.data.response.data.account
+    } else {
+      console.error('계좌 목록 조회 실패:', response.data)
+    }
+  } catch (error) {
+    console.error('계좌 목록 조회 실패:', error.response ? error.response.data : error)
+  }
+}
 
 // 컴포넌트가 마운트될 때 모달 초기화
 onMounted(() => {
@@ -96,6 +127,7 @@ onMounted(() => {
       keyboard: true
     });
   }
+  fetchAccounts()
 });
 
 // 소득 등록 버튼 클릭 시 서버로 데이터 전송
@@ -106,10 +138,11 @@ const registerIncome = async () => {
     date: incomeDate.value,        // 소득 날짜
     contents: incomeContent.value, // 소득 내용
     memo: incomeMemo.value,        // 메모
+    accountNum: selectedAccount.value
   };
   
   try {
-    const response = await axios.post('http://localhost:8080/income/add', incomeData);
+    const response = await axiosInstance.post('/income/add', incomeData);
     if (response.data.success) {
       console.log("소득 등록 성공:", response.data.response.data);
       // 추가 동작 (모달 닫기 등)
