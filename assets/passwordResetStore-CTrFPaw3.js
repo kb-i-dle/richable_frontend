@@ -1,0 +1,1 @@
+import{J as s}from"./index-E7HFo_Uv.js";const t=s("passwordReset",{state:()=>({isVerified:!1,userId:null}),actions:{setVerified(e){this.isVerified=e},setUserId(e){this.userId=e},reset(){this.isVerified=!1,this.userId=null}}});export{t as u};

@@ -1,0 +1,1 @@
+import{_ as e,c as o,o as a}from"./index-E7HFo_Uv.js";const t={__name:"KnowHowDetailPage",setup(c){return(_,n)=>(a(),o("div",null," 노하우 상세 조회 페이지 "))}},r=e(t,[["__scopeId","data-v-db2c6061"]]);export{r as default};

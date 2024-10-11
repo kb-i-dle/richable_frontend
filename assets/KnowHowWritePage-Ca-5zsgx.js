@@ -1,0 +1,1 @@
+import{_ as e,c as o,o as t}from"./index-E7HFo_Uv.js";const a={__name:"KnowHowWritePage",setup(_){return(c,r)=>(t(),o("div",null," 노하우 작성 페이지 "))}},s=e(a,[["__scopeId","data-v-719eee68"]]);export{s as default};
