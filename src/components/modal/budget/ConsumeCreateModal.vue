@@ -98,14 +98,10 @@
 </template>
 
 <script setup>
-<<<<<<< HEAD
 import { ref, onMounted, defineExpose } from 'vue'
 import { Modal } from 'bootstrap'
 import axios from 'axios'
-=======
-import { ref, onMounted, defineExpose, defineEmits } from 'vue'
-import { Modal } from 'bootstrap'
->>>>>>> 3e3263b13425072d0de7937f9e59a7719a3b48bf
+
 import axiosInstance from '@/AxiosInstance'
 
 // 모달 초기화 변수
@@ -117,15 +113,10 @@ const expenseCategory = ref('') // 소비 유형
 const expenseAmount = ref('') // 소비 가격
 const expenseDescript = ref('') // 소비 내용
 const expenseMemo = ref('') // 소비 메모
-<<<<<<< HEAD
+
 const expenseDate = ref('')
 const accounts = ref([])
 const selectedAccount = ref(0)
-=======
-const expenseDate = ref('') // 소비 날짜
-const accounts = ref([]) // 계좌 목록
-const selectedAccount = ref(0) // 선택한 계좌
->>>>>>> 3e3263b13425072d0de7937f9e59a7719a3b48bf
 
 // 모달 열기 함수
 const show = () => {
@@ -139,11 +130,7 @@ const show = () => {
     modalInstance.show()
   }
 }
-<<<<<<< HEAD
-=======
 
-// 계좌 목록 불러오기
->>>>>>> 3e3263b13425072d0de7937f9e59a7719a3b48bf
 const fetchAccounts = async () => {
   try {
     const response = await axiosInstance.get('/asset/account/list')
@@ -172,19 +159,12 @@ onMounted(() => {
 const registerExpense = async () => {
   try {
     const expenseData = {
-<<<<<<< HEAD
       expCategory: expenseCategory.value,              
       amount: parseInt(expenseAmount.value),           
       descript: expenseDescript.value,                 
       memo: expenseMemo.value,
       date : expenseDate.value,
-=======
-      expCategory: expenseCategory.value,
-      amount: parseInt(expenseAmount.value),
-      descript: expenseDescript.value,
-      memo: expenseMemo.value,
-      date: expenseDate.value,
->>>>>>> 3e3263b13425072d0de7937f9e59a7719a3b48bf
+
       accountNum: selectedAccount.value
     };
 
