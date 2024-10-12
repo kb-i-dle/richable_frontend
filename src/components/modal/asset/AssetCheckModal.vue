@@ -37,6 +37,11 @@
                   <td>{{ data.accountNum }}</td>
                   <td>{{ data.prodCategory }}</td>
                   <td>{{ formatCurrency(data.balanceAmt) }} 원</td>
+                  <td>
+                    <button  @click="openUpdateModal(data)">
+                      <font-awesome-icon icon="pen-to-square" />
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -126,6 +131,9 @@ const props = defineProps({
   stockDataList: Array
 })
 
+const checkModal = ref(null); // checkModal 참조
+const updateModal = ref(null); // updateModal 참조
+const selectedAsset = ref(null); // 선택된 자산 저장
 const modal = ref(null)
 let modalInstance = null
 
@@ -133,6 +141,17 @@ let modalInstance = null
 const formatCurrency = (amount) => {
   return amount.toLocaleString('ko-KR')
 }
+
+// 펜 버튼 클릭 시 호출될 함수
+const openUpdateModal = (asset) => {
+  selectedAsset.value = asset; // 선택된 자산을 저장
+  if (checkModal.value) {
+    checkModal.value.hide(); // 현재 모달 닫기
+  }
+  if (updateModal.value) {
+    updateModal.value.show(asset); // updateModal 열기
+  }
+};
 
 // 모달 열기 함수
 const show = () => {

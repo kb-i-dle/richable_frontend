@@ -63,7 +63,7 @@
             </li>
           </ul>
   
-          <router-link :to="{ path: '/budget/list', query: { category: selectedCategory.category } }">
+          <router-link style="text-decoration: none;":to="{ path: '/budget/list', query: { category: selectedCategory.category } }">
             <button class="btn btn-pink">세부항목 보러가기</button>
           </router-link>
         </div>
@@ -216,14 +216,14 @@
   
   <style scoped>
   * {
-    max-width: 1440px;
+    max-width: 1980px;
     font-family: 'Pretendard', sans-serif;
     font-size: 18px;
   }
   
   .wrapper {
     margin: 0 auto;
-    padding: 20px;
+    /* padding: 20px; */
   }
   
   .analyzeWrapper {
@@ -349,17 +349,17 @@
   }
   
   .modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+  z-index: 1000;
+  position: fixed; /* 화면 전체를 덮기 위해 fixed 설정 */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
   
   .modal-content {
     background-color: #fff;
@@ -393,6 +393,10 @@
     cursor: pointer;
   }
   
+  .btn{
+    text-decoration: none;
+  }
+  
   .btn-pink {
     display: block;
     margin: 0 auto;
@@ -403,6 +407,7 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    text-decoration: none;
   }
   
   .btn-pink:hover {

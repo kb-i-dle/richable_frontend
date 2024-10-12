@@ -110,6 +110,7 @@
 import { ref } from 'vue'
 import { Modal } from 'bootstrap'
 import axios from 'axios'
+import axiosInstance from '@/AxiosInstance';
 
 // 이벤트를 상위 컴포넌트로 전달하기 위한 emit 정의
 const emit = defineEmits(['update-asset', 'delete-asset'])
@@ -151,11 +152,7 @@ const updateData = ref({
 // 현물 자산 수정 API 호출 함수
 const fetchSpotUpdate = async (updateData) => {
   try {
-    const response = await axios.put('http://localhost:8080/finance/spot/update', updateData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('authToken')}` // JWT 토큰을 Authorization 헤더에 추가
-      }
-    });
+    const response = await axiosInstance.put('/finance/spot/update', updateData);
 
     // 수정 성공 여부 반환
     return response.data.success;
@@ -212,11 +209,7 @@ const updateAsset = async () => {
 // 현물 자산 삭제 API 호출 함수
 const fetchSpotDelete = async (assetId) => {
   try {
-    const response = await axios.delete(`http://localhost:8080/finance/spot/delete/${assetId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('authToken')}` // JWT 토큰을 Authorization 헤더에 추가
-      }
-    });
+    const response = await axiosInstance.delete(`/finance/spot/delete/${assetId}`);
 
     // 삭제 성공 여부 반환
     return response.data.success;

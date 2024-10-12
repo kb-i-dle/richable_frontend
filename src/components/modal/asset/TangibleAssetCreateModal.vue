@@ -116,6 +116,7 @@
 import { ref, onMounted, defineExpose } from 'vue'
 import { Modal } from 'bootstrap'
 import axios from 'axios'
+import axiosInstance from '@/AxiosInstance';
 
 const emit = defineEmits(['create-asset'])
 
@@ -167,11 +168,7 @@ const cancelAsset = () => {
 // 현물 자산 추가 API 호출 함수
 const fetchSpotAdd = async (addData) => {
   try {
-    const response = await axios.post('http://localhost:8080/finance/spot/add', addData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('authToken')}` // JWT 토큰을 Authorization 헤더에 추가
-      }
-    });
+    const response = await axiosInstance.post('/finance/spot/add', addData);
 
     // 추가 성공 여부 반환
     if (response.data.success) {

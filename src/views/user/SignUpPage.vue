@@ -173,7 +173,7 @@ const formatDate = (date) => {
 // const currentYear = new Date().getFullYear()
 // const years = Array.from({ length: currentYear - 1900 + 1 }, (v, i) => currentYear - i)
 
-const BASE_URL = 'http://localhost:8080/member'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 // Check id availability
 const checkId = async () => {

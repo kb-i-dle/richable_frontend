@@ -41,7 +41,7 @@
         <div class="asset-list">
           <div class="list-title">
             금융 자산 목록
-            <!-- <font-awesome-icon icon="square-plus" style="color: #c30044" @click="openCreateModal" /> -->
+            <font-awesome-icon icon="square-plus" style="color: #c30044" @click="openCreateModal" />
           </div>
 
           <div class="list-box">
@@ -258,40 +258,11 @@ const itemsPerPage = 4
 
 // 자산 데이터
 const selectedAssetType = ref('bank')
-const bankDataList = ref([
-  { orgCode: '국민은행', accountNum: 93800123456, prodCategory: '예금', balanceAmt: 1000000 },
-  { orgCode: '신한은행', accountNum: 12345678910, prodCategory: '적금', balanceAmt: 1500000 },
-  { orgCode: '하나은행', accountNum: 56789012345, prodCategory: '예금', balanceAmt: 2000000 }
-])
-
-const bondDataList = ref([
-  { name: '국고채권 01500-5003(20-2)', cnt: 2, price: 7000 },
-  { name: '국고채권 01200-4003(18-3)', cnt: 3, price: 8500 },
-  { name: '국고채권 01300-5003(19-2)', cnt: 5, price: 9200 }
-])
-
-const coinDataList = ref([
-  { currency: 'BTC', balance: 0.5, avgBuyPrice: 45000000 },
-  { currency: 'ETH', balance: 2.0, avgBuyPrice: 1500000 },
-  { currency: 'XRP', balance: 5000.0, avgBuyPrice: 1000 }
-])
-
-const stockDataList = ref([
-  { prdtName: '삼성전자', hldgQty: 10, avgBuyPrice: 80000 },
-  { prdtName: 'LG화학', hldgQty: 5, avgBuyPrice: 750000 },
-  { prdtName: '카카오', hldgQty: 15, avgBuyPrice: 110000 }
-])
-
-const tangibleAssets = ref([
-  { index: 1, category: '전자기기', name: '아이폰', price: 1200000 },
-  { index: 2, category: '명품', name: '구찌 가방', price: 3000000 },
-  { index: 3, category: '브랜드', name: '나이키 신발', price: 200000 },
-  { index: 4, category: '기타', name: '기타 자산', price: 500000 },
-  { index: 5, category: '전자기기', name: '맥북', price: 2000000 },
-  { index: 6, category: '명품', name: '프라다 가방', price: 3500000 },
-  { index: 7, category: '브랜드', name: '아디다스 신발', price: 150000 },
-  { index: 8, category: '기타', name: '기타 자산 2', price: 600000 }
-])
+const bankDataList = ref([])
+const bondDataList = ref([])
+const coinDataList = ref([])
+const stockDataList = ref([])
+const tangibleAssets = ref([])
 
 // 2. 계산된 속성 정의
 const latestAssets = computed(() => tangibleAssets.value.slice().reverse()) // 최신순 정렬

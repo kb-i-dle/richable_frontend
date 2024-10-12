@@ -190,7 +190,6 @@ html {
 }
 
 .img {
-
   background-image: url('src/assets/images/rich.png');
   background-size: cover;
   background-repeat: no-repeat;

@@ -102,13 +102,18 @@ const BASE_URL = 'http://localhost:8080/member'
 const sendVerificationCode = async () => {
   if (email.value && id.value) {
     try {
-      const response = await axios.post(`${BASE_URL}/find/pw/auth`, {
+      const response = await axios.post(`${BASE_URL}/find/pw`, {
         email: email.value,
         id: id.value
       })
-      alert(response.data.message)
-      isCodeSent.value = true
+      if (response.data.success) {
+        alert(response.data.response?.data?.message || '인증 코드가 전송되었습니다.')
+        isCodeSent.value = true
+      } else {
+        alert(response.data.response || '인증 코드 전송에 실패했습니다.')
+      }
     } catch (error) {
+      console.error('Error sending verification code:', error)
       alert(error.response?.data?.message || '오류가 발생했습니다.')
     }
   } else {
@@ -119,14 +124,19 @@ const sendVerificationCode = async () => {
 const verifyCode = async () => {
   if (verificationCode.value) {
     try {
-      const response = await axios.post(`${BASE_URL}/find_pw_auth`, {
+      const response = await axios.post(`${BASE_URL}/find/pw/auth`, {
         email: email.value,
         id: id.value,
         code: verificationCode.value
       })
-      isVerified.value = true
-      alert('이메일 인증 성공')
+      if (response.data.success) {
+        isVerified.value = true
+        alert('이메일 인증 성공')
+      } else {
+        alert(response.data.response || '인증에 실패했습니다.')
+      }
     } catch (error) {
+      console.error('Error verifying code:', error)
       alert(error.response?.data?.message || '인증 코드가 일치하지 않습니다.')
     }
   } else {

@@ -11,7 +11,7 @@
 
     <!-- 상단 소비 정보 -->
     <div class="text-center total-asset">
-      <div class="asset-title">{{ diffAmount > 0 ? '이번 달에 아낄 수 있었던 비용이에요 😢' : '이번달에 아낀 비용이에요' }}</div>
+      <div class="asset-title">{{ diffAmount > 0 ? '이번 달에 아낄 수 있었던 비용이에요 😢' : '이번달에 아낀 비용이에요 😲' }}</div>
       <div class="asset-amount">{{ Math.abs(couldsaving).toLocaleString() }}원</div>
     </div>
 
@@ -100,7 +100,7 @@ const curMonth = ref(monthStore.month); // store에서 월 가져오기
 const curYear = ref(monthStore.year);   // store에서 연도 가져오기
 console.log(curMonth, curYear);
 const category = ref('식료품') // 기본 카테고리를 '식료품'으로 설정
-const categories = ref(['식료품', '유흥', '쇼핑', '공과금', '생활용품', '의료비', '교통비', '통신비', '문화', '교육비', '외식 · 숙박', '기타'])
+const categories = ref(['식료품', '유흥', '쇼핑', '공과금', '생활용품', '의료비', '교통비', '통신비', '문화', '교육비', '외식 · 숙박','비소비지출','기타'])
 const userSpending = ref(0)
 const couldsaving = ref(0)
 const averageSpending = ref(0)
@@ -130,7 +130,8 @@ const wordMapping2 = {
 '문화': '오락 · 문화',
 '교육비': '교육',
 '외식 · 숙박': '음식 · 숙박',
-'기타': '기타상품 · 서비스'
+'기타': '기타상품 · 서비스',
+'비소비지출' : '비소비지출'
 };
 
 // 매핑 함수
@@ -327,9 +328,6 @@ const createComparisonChart = () => {
 };
 
 
-
-
-
   const createSavingChart = (months, saveAmount, possibleSaveAmount) => {
   const ctx2 = document.getElementById('savingChart')?.getContext('2d');
   
@@ -475,22 +473,19 @@ onMounted(() => {
   border: 1px solid #f8f8f8;
 }
 
-.chart-container{
-  width: 1224px;
-  border-radius: 20px;
-  border: 1px solid #CFD9E8;
-  background: #FFF;
-  margin-top: 21px;
-  flex-shrink: 0;
-  border-radius: 20px;
-  background: #FAFAFB;
+.chart-container {
+
   display: flex;
-  height: 500px;
-  padding: 10px 10px 10px 10px;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  height: auto;
+  padding: 20px; /* 패딩으로 차트 여백 확보 */
+  background: #fff;
 }
+
+
+
 
 .consume-title{
   color: var(--black-default, #19181D);
@@ -510,12 +505,21 @@ onMounted(() => {
 
 .saving-content{
   margin-top: 100px;
+  
+  
 }
 
-#myChart{
-
-    height: 380px;
+#myChart {
+  width: 100%; /* 캔버스 너비를 부모 요소에 맞춤 */
+  max-width: 800px; /* 캔버스 최대 너비 설정 */
+  height: auto; /* 높이는 자동으로 설정 */
+  margin: 0 auto; /* 중앙 정렬 */
+  display: block; /* block 요소로 설정 */
+  border-radius: 20px;
+  border: 1px solid #e4ebf0;
+  
 }
+
 
 /* 월 네비게이션 */
 .month-navigation {
@@ -605,6 +609,8 @@ onMounted(() => {
   padding: 20px;
   border-radius: 10px;
   text-align: center;
+  
+  
 }
 
 .savings-summary-container h4 {
@@ -632,5 +638,7 @@ canvas {
   height: 400px;
   margin: 0 auto;
   display: block;
+  border-radius: 20px;
+  border: 1px solid #e4ebf0;
 }
 </style>
