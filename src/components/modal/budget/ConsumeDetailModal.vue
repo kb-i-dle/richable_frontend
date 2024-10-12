@@ -63,6 +63,7 @@ import { ref, onMounted, defineExpose, defineProps } from 'vue';
 import { Modal } from 'bootstrap';
 import axios from 'axios';
 import ConsumeUpdateModal from '@/components/modal/budget/ConsumeUpdateModal.vue';
+import axiosInstance from '@/AxiosInstance';
 
 const props = defineProps({ detail: { type: Object, required: true } });
 
@@ -73,7 +74,7 @@ const updateModal = ref(null); // ConsumeUpdateModal 참조
 // 소비 상세 조회 데이터 불러오기
 const fetchOutcomeDetail = async (index) => {
   try {
-    const response = await axios.get(`http://localhost:8080/outcome/detail/${index}`);
+    const response = await axiosInstance.get(`/outcome/detail/${index}`);
     if (response.data.success) {
       // 데이터가 성공적으로 반환되면 props.detail 업데이트
       props.detail = response.data.response.data;

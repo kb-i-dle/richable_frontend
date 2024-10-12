@@ -1,10 +1,12 @@
 <template>
-    <div class="container">
+  <div class="container">
     <!-- 상단 질문 텍스트 -->
     <div class="total-asset-title">나의 자산 중 여유자금은 얼마일까요?</div>
-      <div class="total-asset">
-      <div class="total-asset-sub">나의 전체 자산 중 바로 투자를 할 수 있는 <br/>
-          여유자금은 <p style="display: inline; font-size: 18px;" class="highlight">{{ availableCash.toLocaleString()}}원 </p>이에요.</div>
+    <div class="total-asset">
+      <div class="total-asset-sub">
+        나의 전체 자산 중 바로 투자를 할 수 있는 <br />
+        여유자금은 <p style="display: inline; font-size: 18px;" class="highlight">{{ availableCash.toLocaleString() }}원</p> 이에요.
+      </div>
     </div>
 
     <!-- 도넛 차트 영역 -->
@@ -14,21 +16,15 @@
           <svg viewBox="0 0 36 36">
             <path
               class="circle-bg"
-              d="M18 2.0845
-                 a 15.9155 15.9155 0 0 1 0 31.831
-                 a 15.9155 15.9155 0 0 1 0 -31.831"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             />
             <path
               class="circle"
               :stroke-dasharray="`${availablePercentage}, 100`"
-              d="M18 2.0845
-                 a 15.9155 15.9155 0 0 1 0 31.831
-                 a 15.9155 15.9155 0 0 1 0 -31.831"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             />
           </svg>
-          <div class="chart-label">
-           {{ availablePercentage.toFixed(0) }}%
-          </div>
+          <div class="chart-label">{{ availablePercentage.toFixed(0) }}%</div>
         </div>
       </div>
 
@@ -44,16 +40,20 @@
     </div>
 
     <div class="cha-title">
-      <div class="cha-title-sub">김리치님의 <p style="display: inline; color: #ff0062;">{{ tendency }}</p> 성향을 기반으로 추천드려요.</div>
+      <div class="cha-title-sub">
+        "{{ nickname }}"님은 <p style="display: inline; color: #ff0062;">{{ tendency }}</p> 성향 입니다.
+      </div>
       <div class="cha-title-main">{{ category }} 상품에 여유자금으로 투자하기</div>
     </div>
 
-<!-- 로딩 상태에 따른 투자 성향 및 카테고리 정보 표시 -->
+    <!-- 로딩 상태에 따른 투자 성향 및 카테고리 정보 표시 -->
     <div v-if="isLoadingTendency" class="spinner-container">
       <div class="spinner scroll-wrapper"></div>
     </div>
     <div v-else class="cha-title">
-      <div class="cha-title-sub">김리치님의 <p style="display: inline; color: #ff0062;">{{ tendency }}</p> 성향을 기반으로 추천드려요.</div>
+      <div class="cha-title-sub">
+        "{{ nickname }}"님의 <p style="display: inline; color: #ff0062;">{{ tendency }}</p> 성향을 기반으로 추천드려요.
+      </div>
       <div class="cha-title-main">{{ category }} 상품에 여유자금으로 투자하기</div>
     </div>
 
@@ -80,7 +80,6 @@
         <font-awesome-icon style="color: #fff;" :icon="['fas', 'chevron-right']" />
       </button>
     </div>
-    
   </div>
 </template>
 
@@ -90,9 +89,11 @@ import axiosInstance from '@/AxiosInstance';
 
 const availableCash = ref(0); // 여유 자금
 const availablePercentage = ref(0); // 여유 자금 비율
+const totalAssets = ref(0); // 전체 자산
 const recommendedProducts = ref([]); // 추천 상품
 const tendency = ref(''); // 투자 성향 데이터
 const category = ref(''); // 카테고리 데이터
+const nickname = ref(''); // 닉네임 데이터 추가
 const isLoadingTendency = ref(true);
 
 const scrollContainer = ref(null);
@@ -135,52 +136,70 @@ onMounted(() => {
   const token = localStorage.getItem('authToken'); // JWT 토큰 가져오기
 
   if (token) {
-    // 여유 자금 및 비율 가져오기
-    axiosInstance.get('/invest/available')
-    .then(response => {
-      if (response.data.success) {
-        availableCash.value = response.data.response.data.availableCash; // 여유 자금 설정
-        availablePercentage.value = calculatePercentage(response.data.response.data.availableCash); // 비율 계산
-      } else {
-        console.error("여유 자금 데이터를 가져오는데 실패했습니다.");
-      }
-    })
-    .catch(error => {
-      console.error("여유 자금 데이터를 가져오는 중 에러 발생:", error);
-    });
+    // 전체 자산 가져오기
+    axiosInstance.get('/finance/total/sum')
+      .then(response => {
+        if (response.data.success) {
+          totalAssets.value = response.data.response.data.amount; // 총 자산에서 amount 추출
+
+          // 여유 자금 가져오기
+          return axiosInstance.get('/invest/available');
+        } else {
+          console.error("전체 자산 데이터를 가져오는데 실패했습니다.");
+        }
+      })
+      .then(response => {
+        if (response && response.data.success) {
+          availableCash.value = response.data.response.data.availableCash; // 여유 자금 설정
+          availablePercentage.value = calculatePercentage(availableCash.value); // 비율 계산
+        } else {
+          console.error("여유 자금 데이터를 가져오는데 실패했습니다.");
+        }
+      })
+      .catch(error => {
+        console.error("데이터 가져오는 중 에러 발생:", error);
+      });
 
     // 추천 상품 가져오기
     axiosInstance.get('/invest/recommended')
-    .then(response => {
-      if (response.data.success) {
-        recommendedProducts.value = response.data.response.data; // 추천 상품 설정
-        isLoadingTendency.value = false; // 데이터 로딩 완료 후 로딩 상태 변경
-      } else {
-        console.error("추천 상품을 가져오는데 실패했습니다.");
-      }
-    })
-    .catch(error => {
-      console.error("추천 상품을 가져오는 중 에러 발생:", error);
-    });
+      .then(response => {
+        if (response.data.success) {
+          recommendedProducts.value = response.data.response.data; // 추천 상품 설정
+          isLoadingTendency.value = false; // 데이터 로딩 완료 후 로딩 상태 변경
+        } else {
+          console.error("추천 상품을 가져오는데 실패했습니다.");
+        }
+      })
+      .catch(error => {
+        console.error("추천 상품을 가져오는 중 에러 발생:", error);
+      });
 
-     // 투자 성향 및 카테고리 데이터 가져오기
-     axiosInstance.get('/invest/tendency')
+    // 투자 성향 및 카테고리 데이터 가져오기
+    axiosInstance.get('/invest/tendency')
       .then(response => {
         if (response.data.success) {
           tendency.value = response.data.response.data.tendency; // 투자 성향 데이터 설정
-          category.value = response.data.response.data.category; // 카테고리 데이터 설정ㄴ
+          category.value = response.data.response.data.category; // 카테고리 데이터 설정
         } else {
           console.error("투자 성향 데이터를 가져오는데 실패했습니다.");
         }
-      
       })
       .catch(error => {
         console.error("투자 성향 데이터를 가져오는 중 에러 발생:", error);
-      })
-      .finally(() => {
-       
       });
 
+    // 닉네임 가져오기
+    axiosInstance.get('/member/info')
+      .then(response => {
+        if (response.data.success) {
+          nickname.value = response.data.response.data.data.nickname; // 닉네임 설정
+        } else {
+          console.error("닉네임 데이터를 가져오는데 실패했습니다.");
+        }
+      })
+      .catch(error => {
+        console.error("닉네임 데이터를 가져오는 중 에러 발생:", error);
+      });
   } else {
     console.error('JWT 토큰이 localStorage에 없습니다.');
     isLoadingTendency.value = false; // 오류 발생 시에도 로딩 상태 변경
@@ -189,15 +208,16 @@ onMounted(() => {
 
 // 여유 자금 비율 계산 함수
 const calculatePercentage = (cash) => {
-  const totalAssets = 5000000; // 전체 자산 값 설정 (변경 가능)
-  return (cash / totalAssets) * 100;
+  // totalAssets 값이 0이거나 아직 설정되지 않았을 경우 대비
+  if (!totalAssets.value || totalAssets.value === 0) {
+    return 0; // 비율을 계산할 수 없으므로 0% 반환
+  }
+  return (cash / totalAssets.value) * 100; // 비율 계산
 };
-
 </script>
 
 <style scoped>
 * {
-  /* text-align: center; */
   color: #19181d;
   font-family: 'Pretendard', sans-serif;
   max-width: 1704px;
@@ -212,18 +232,18 @@ const calculatePercentage = (cash) => {
   margin-top: 18px;
   background-color: #f9f9f9;
   height: 120px;
-  padding : 25px;
+  padding: 25px;
 }
 
 .total-asset-title {
-  margin-top : 8xp;
+  margin-top: 8xp;
   color: var(--4, #1D1616);
   font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 18px;
   font-style: normal;
   font-weight: 700;
-  line-height: 27px; /* 135% */  
+  line-height: 27px;
 }
 
 .total-asset-sub {
@@ -233,11 +253,11 @@ const calculatePercentage = (cash) => {
   font-size: 18px;
   font-style: normal;
   font-weight: 500;
-  line-height: 32px; /* 160% */
+  line-height: 32px;
   letter-spacing: -0.8px;
 }
 
-.highlight{
+.highlight {
   color: var(--Primary-30, #FF0062);
   font-feature-settings: 'dlig' on;
   font-family: Pretendard;
@@ -250,7 +270,7 @@ const calculatePercentage = (cash) => {
 
 .chart-container1 {
   height: 320px;
-  margin-top : 18px;
+  margin-top: 18px;
   border-radius: 20px;
   border: 1px solid #e4ebf0;
   background: #FFF;
@@ -258,7 +278,7 @@ const calculatePercentage = (cash) => {
   flex-direction: column;
 }
 
-.chart-container2{
+.chart-container2 {
   width: 200px;
   height: 200px;
   position: relative;
@@ -329,33 +349,28 @@ const calculatePercentage = (cash) => {
   background-color: #ff0062; /* 여유 자금 색상 */
 }
 
-.cha-title{
+.cha-title {
   margin-top: 100px;
 }
 
-.cha-title-sub{
+.cha-title-sub {
   color: var(--4, #1D1616);
-font-family: Pretendard;
-font-size: 18px;
-font-style: normal;
-font-weight: 500;
-line-height: 150%; /* 27px */
-letter-spacing: -0.36px;
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 150%;
+  letter-spacing: -0.36px;
 }
 
-.cha-title-main{
+.cha-title-main {
   color: var(--4, #1D1616);
-font-family: Pretendard;
-font-size: 18px;
-font-style: normal;
-font-weight: 700;
-line-height: 150%; /* 27px */
-letter-spacing: -0.36px;
-}
-
-.card-container{
-  font-family: pretendard;
-  margin-top: 18px;
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 150%;
+  letter-spacing: -0.36px;
 }
 
 .custom-card {
@@ -382,7 +397,7 @@ letter-spacing: -0.36px;
   font-size: 16px;
   font-style: normal;
   font-weight: 700;
-  line-height: 27px; /* 168.75% */
+  line-height: 27px;
 }
 
 .risk-medium {
@@ -404,7 +419,7 @@ letter-spacing: -0.36px;
   font-size: 18px;
   font-style: normal;
   font-weight: 500;
-  line-height: 27px; /* 150% */
+  line-height: 27px;
 }
 
 .product-price {
@@ -414,7 +429,7 @@ letter-spacing: -0.36px;
   font-size: 20px;
   font-style: normal;
   font-weight: 500;
-  line-height: 27px; /* 122.727% */ 
+  line-height: 27px;
 }
 
 .unit-price {
@@ -425,7 +440,7 @@ letter-spacing: -0.36px;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
-  line-height: 27px; /* 168.75% */
+  line-height: 27px;
 }
 
 .scroll-wrapper {
@@ -434,7 +449,7 @@ letter-spacing: -0.36px;
   justify-content: space-between;
   align-items: center;
   position: relative;
-  height: 250px; /* 카드와 버튼이 잘리지 않도록 높이를 충분히 설정 */
+  height: 250px;
 }
 
 .scroll-container {
@@ -443,14 +458,14 @@ letter-spacing: -0.36px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
-  padding: 20px 50px; /* 좌우 여백을 50px로 증가 */
+  padding: 20px 50px;
   margin: 20px;
 }
 
 .scroll-item {
-  flex: 0 0 280px; /* 카드 너비를 280px로 줄임 */
+  flex: 0 0 280px;
   scroll-snap-align: start;
-  margin-right: 20px; /* 카드 간격을 20px로 유지 */
+  margin-right: 20px;
 }
 
 button {
@@ -471,21 +486,16 @@ button:hover {
   background-color: #d4004f;
 }
 
-.disabled-button {
-  background-color: #ccc !important;
-  cursor: not-allowed;
-}
-
 .spinner-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px; /* 로딩 스피너의 중앙 정렬을 위한 높이 */
+  height: 200px;
 }
 
 .spinner {
-  border: 8px solid #f3f3f3; /* Light grey */
-  border-top: 8px solid #ff0062; /* Primary color */
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #ff0062;
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -500,5 +510,4 @@ button:hover {
     transform: rotate(360deg);
   }
 }
-
 </style>

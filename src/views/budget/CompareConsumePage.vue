@@ -132,6 +132,8 @@ const wordMapping2 = {
 '외식 · 숙박': '음식 · 숙박',
 '기타': '기타상품 · 서비스',
 '비소비지출' : '비소비지출'
+'기타': '기타상품 · 서비스',
+'비소비지출' : '비소비지출'
 };
 
 // 매핑 함수
@@ -474,7 +476,7 @@ onMounted(() => {
 }
 
 .chart-container {
-
+.chart-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -638,6 +640,8 @@ canvas {
   height: 400px;
   margin: 0 auto;
   display: block;
+  border-radius: 20px;
+  border: 1px solid #e4ebf0;
   border-radius: 20px;
   border: 1px solid #e4ebf0;
 }

@@ -27,18 +27,19 @@
         <select style="height: 48px; margin-left:8px; " id="expenseCategory" v-model="selectedExpenseCategory" class="form-select short-select">
 
           <option value="">전체</option>
-          <option value="식료품">식료품</option>
-          <option value="유흥">유흥</option>
-          <option value="쇼핑">쇼핑</option>
-          <option value="공과금">공과금</option>
-          <option value="생활용품">생활용품</option>
-          <option value="의료비">의료비</option>
-          <option value="교통비">교통비</option>
-          <option value="통신비">통신비</option>
-          <option value="문화">문화</option>
-          <option value="교육비">교육비</option>
-          <option value="외식 · 숙박">외식 · 숙박</option>
-          <option value="기타">기타</option>
+          <option value="식료품 · 비주류음료">식료품 · 비주류음료</option>
+          <option value="주류 · 담배">주류 · 담배</option>
+          <option value="의류 · 신발">의류 · 신발</option>
+          <option value="주거 · 수도 · 광열">주거 · 수도 · 광열</option>
+          <option value="가정용품 · 가사서비스">가정용품 · 가사서비스</option>
+          <option value="보건">보건</option>
+          <option value="교통">교통</option>
+          <option value="통신">통신</option>
+          <option value="오락 · 문화">오락 · 문화</option>
+          <option value="교육">교육</option>
+          <option value="음식">음식</option>
+          <option value="기타상품">기타상품</option>
+          <option value="비소비지출">비소비지출</option>
         </select>
       </div>
 
@@ -106,7 +107,9 @@
       <select  style="height: 48px; margin-left: 8px;"  v-model="selectedIncomeCategory" id="incomeCategory" class="form-select short-select">
         <option value="">전체</option>
         <option value="월급">월급</option>
-        <option value="비정기소득">비정기소득</option>
+        <option value="비정기 소득">비정기 소득</option>
+        <option value="이자 소득">이자 소득</option>
+        <option value="투자 소득">투자 소득</option>
         <option value="보너스">보너스</option>
       </select>
     </div>
@@ -167,13 +170,14 @@
     </button>
 
     <!-- 소비/소득 등록 모달 -->
-    <IncomeCreateModal ref="createModal"/>
+    <IncomeCreateModal ref="createModal" @incomeRegistered="fetchIncomes"/>
     <IncomeDetailModal ref="detailModal" :detail="selectedDetail" @close="closeDetailModal"/>
-    <IncomeUpdateModal ref="updateModal"/>
+    <IncomeUpdateModal ref="updateModal" @incomeUpdated="fetchIncomes" @incomeDeleted="fetchIncomes" />
 
-    <ConsumeCreateModal ref="createModal2"/>
+  
+    <ConsumeCreateModal ref="createModal2" @outcomeRegistered="fetchExpenses" />
     <ConsumeDetailModal ref="detailModal2" :detail="selectedDetail2" @close="closeDetailModal2"/>
-    <ConsumeUpdateModal ref="updateModal2"/>
+    <ConsumeUpdateModal ref="updateModal2" @outcomeUpdated="fetchExpenses" @outcomeDeleted="fetchExpenses"/>
   </div>
 </template>
 
@@ -225,7 +229,6 @@ const fetchExpenses = async () => {
 const fetchIncomes = async () => {
   try {
     const response = await axiosInstance.get('/income/all');
-
     if (Array.isArray(response.data.response.data)) {
       incomes.value = response.data.response.data;
     } else {
@@ -237,6 +240,11 @@ const fetchIncomes = async () => {
   }
 };
 
+// 수정 모달 열기
+const openEditModal = (income) => {
+  const modalRef = ref(null);
+  modalRef.value.show(income);  // 자식 컴포넌트에서 수정할 데이터 전달
+};
 
 // 탭 변경 시 데이터 로드
 // watch(selectedTab, (newTab) => {
@@ -374,8 +382,6 @@ fetchExpenses();
   height: 12px;
 
   color: var(--gray-gray-90, #1D1D1D);
-  leading-trim: both;
-  text-edge: cap;
   font-family: Pretendard;
   font-size: 16px;
   font-style: normal;
@@ -421,8 +427,6 @@ fetchExpenses();
 .sort-option-title{
   padding: 8px;
   color: var(--gray-gray-90, #1D1D1D);
-  leading-trim: both;
-  text-edge: cap;
   font-family: Pretendard;
   font-size: 16px;
   font-style: normal;
@@ -435,8 +439,6 @@ fetchExpenses();
   border: 0px;
   background-color: white;
   color: var(--gray-gray-70, #555);
-  leading-trim: both;
-  text-edge: cap;
   font-family: Pretendard;
   font-size: 16px;
   font-style: normal;

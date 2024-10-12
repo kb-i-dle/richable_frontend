@@ -1,5 +1,12 @@
 <template>
   <div>
+    <!-- 소득 리스트 출력 -->
+    <ul>
+      <li v-for="income in incomeList" :key="income.incomeId">
+        {{ income.incomeDate }} - {{ income.type }} - {{ income.price }}원
+      </li>
+    </ul>
+
     <!-- 수정 모달 -->
     <div class="modal fade" id="editAssetModal" tabindex="-1" aria-labelledby="editAssetLabel" aria-hidden="true" ref="modal">
       <div class="modal-dialog">
@@ -17,8 +24,10 @@
                 <label for="assetType" class="form-label" style="font-weight: bold;"></label>
                 <select class="form-select" id="assetType" v-model="type">
                   <option value="월급">월급</option>
-                  <option value="비정기소득">비정기소득</option>
-                  <option value="보너스">보너스</option>
+        <option value="비정기 소득">비정기 소득</option>
+        <option value="이자 소득">이자 소득</option>
+        <option value="투자 소득">투자 소득</option>
+        <option value="보너스">보너스</option>
                 </select>
               </div>
 
@@ -89,23 +98,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineExpose } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, defineExpose, defineEmits } from 'vue';
 import { Modal } from 'bootstrap';
+import axiosInstance from '@/AxiosInstance';
+
+// 이벤트 정의
+const emit = defineEmits(['incomeUpdated', 'incomeDeleted']);
+const incomeList = ref([]);
 
 const modal = ref(null);
 const deleteModal = ref(null);  // 삭제 확인 모달
 let modalInstance = null;
 let deleteModalInstance = null;  // 삭제 확인 모달 인스턴스
-const isDeleteModalVisible = ref(false); // 삭제 모달 표시 여부
+const isDeleteModalVisible = ref(false); 
 
 // 데이터 바인딩 변수
-const incomeId = ref(null);  // 소득 항목의 ID
-const type = ref(''); // 소득 유형
-const incomeDate = ref(''); // 소득 날짜
-const price = ref(''); // 소득 가격
-const contents = ref(''); // 소득 내용
-const memo = ref(''); // 메모
+const incomeId = ref(null);  
+const type = ref(''); 
+const incomeDate = ref(''); 
+const price = ref(''); 
+const contents = ref(''); 
+const memo = ref(''); 
 
 // 모달 열기 함수
 const show = (data) => {
@@ -121,10 +134,8 @@ const show = (data) => {
 
   // 데이터 초기화 (수정하려는 데이터를 받으면 할당)
   if (data) {
-    incomeId.value = data.incomeId;  // 수정할 항목의 ID
+    incomeId.value = data.incomeId;  
     type.value = data.type;
-
-    // 날짜 형식을 YYYY-MM-DD로 변환하여 바인딩
     incomeDate.value = new Date(data.incomeDate).toISOString().split('T')[0]; 
     price.value = data.price;
     contents.value = data.contents;
@@ -134,7 +145,7 @@ const show = (data) => {
 
 // 삭제 확인 모달 열기
 const showDeleteConfirmation = () => {
-  isDeleteModalVisible.value = true; // 삭제 모달이 표시되면 상태 업데이트
+  isDeleteModalVisible.value = true;
   if (!deleteModalInstance && deleteModal.value) {
     deleteModalInstance = new Modal(deleteModal.value, {
       backdrop: 'static',
@@ -148,22 +159,23 @@ const showDeleteConfirmation = () => {
 
 // 삭제 모달 닫기 함수
 const closeDeleteModal = () => {
-  isDeleteModalVisible.value = false; // 삭제 모달이 닫히면 수정 모달의 흐림 효과 제거
+  isDeleteModalVisible.value = false;
 };
 
 // 삭제 확인 후 실제 삭제 동작
 const confirmDelete = async () => {
   try {
-    const response = await axios.delete(`http://localhost:8080/income/delete/${incomeId.value}`);
+    const response = await axiosInstance.delete(`/income/delete/${incomeId.value}`);
     if (response.data.success) {
       console.log("소득 삭제 성공:", response.data.response.data);
       if (modalInstance) {
-        modalInstance.hide();  // 삭제 후 수정 모달 닫기
+        modalInstance.hide();
       }
       if (deleteModalInstance) {
-        deleteModalInstance.hide();  // 삭제 확인 모달 닫기
+        deleteModalInstance.hide();
       }
-      isDeleteModalVisible.value = false; // 삭제 모달 닫힘
+      isDeleteModalVisible.value = false;
+      emit('incomeDeleted', incomeId.value); // 삭제된 데이터의 ID 전달
     } else {
       console.error("소득 삭제 실패:", response.data.message);
     }
@@ -172,24 +184,26 @@ const confirmDelete = async () => {
   }
 };
 
+
 // 수정 버튼 클릭 시 동작
 const updateIncome = async () => {
   try {
     const updatedIncomeData = {
-      incomeId: incomeId.value,  // 수정할 항목의 ID 전송
+      incomeId: incomeId.value,
+      incomeDate: incomeDate.value,
       type: type.value,
       price: parseInt(price.value),
       contents: contents.value,
       memo: memo.value,
     };
-
-    const response = await axios.put('http://localhost:8080/income/update', updatedIncomeData);
-
+    console.log('전송할 데이터:', updatedIncomeData);  // 데이터 확인용 로그
+    const response = await axiosInstance.put('/income/update', updatedIncomeData);
     if (response.data.success) {
       console.log("소득 수정 성공:", response.data.response.data);
       if (modalInstance) {
         modalInstance.hide();
       }
+      emit('incomeUpdated', updatedIncomeData); // 수정된 데이터 전달
     } else {
       console.error("소득 수정 실패:", response.data);
     }
@@ -197,6 +211,7 @@ const updateIncome = async () => {
     console.error("소득 수정 실패:", error.response ? error.response.data : error);
   }
 };
+
 
 // 모달 인스턴스 초기화
 onMounted(() => {
