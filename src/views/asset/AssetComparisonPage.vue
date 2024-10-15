@@ -15,9 +15,9 @@
                 ref="tooltipButton"
                 type="button"
                 data-bs-toggle="tooltip"
-                data-bs-placement="right"
+                data-bs-placement="left"
                 :title="tooltipMessage"
-                >
+              >
                 <font-awesome-icon icon="circle-question" style="font-size: 25px" />
               </button>
             </div>
@@ -95,8 +95,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted,nextTick } from 'vue';
-import { Chart, registerables } from 'chart.js';
+import { ref, onMounted } from 'vue';
+import { Chart, registerables, Tooltip } from 'chart.js';
 import axiosInstance from '@/AxiosInstance.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Tooltip as BootstrapTooltip } from 'bootstrap'
@@ -113,10 +113,8 @@ const currentAsset = ref(0);
 const peerAverageAsset = ref(0); // 20대 평균 자산
 const assetDifference = ref(0); // 내 자산과 20대 평균 자산의 차이
 
-
 // 자산 리스트 (카테고리별)
 const assetList = ref([]);
-const financeData = ref([]);
 
 // 로딩 상태 및 오류 메시지
 const loading = ref(false);
@@ -212,7 +210,6 @@ const fetchPeerFinanceData = async () => {
     console.error('Error fetching peer finance data:', error);
   } finally {
     loading.value = false;
-    console.log(financeData.value); // 데이터를 받아온 후 확인
   }
 };
 
@@ -405,13 +402,6 @@ onMounted(async () => {
   await fetchPeerData();
   await fetchPeerFinanceData();
   createCharts(); // 차트 생성을 데이터 fetch 후에 실행
-  nextTick(() => {
-    // 첫 번째 툴팁 초기화
-    if (tooltipButton.value) {
-      tooltipButton.value.setAttribute('title', tooltipMessage.value);
-      tooltipInstance.value = new BootstrapTooltip(tooltipButton.value);
-    }
-  });
 });
 </script>
 
@@ -461,7 +451,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .graph-container-title {
@@ -533,13 +523,13 @@ td {
 }
 
 .tooltip-inner {
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 
 .tooltip-box {
   position: absolute;
   right: 0;
-  top: 30;
+  top: 0;
   z-index: 10;
 }
 
@@ -554,8 +544,8 @@ td {
 
 .tooltip-inner {
   font-family: 'Pretendard';
-  max-width: 400px ;
-  white-space: normal ;
+  max-width: 400px !important;
+  white-space: normal !important;
   font-size: 12px;
 }
 </style>

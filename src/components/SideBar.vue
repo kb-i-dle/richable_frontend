@@ -108,137 +108,136 @@
 
       <!-- 로그인/유저 정보/로그아웃 -->
       <div class="menu-bottom">
-    <!-- 로그인 버튼: 로그인되지 않은 경우 표시 -->
-    <router-link v-if="!isLoggedIn" to="/user/signin" :class="isSideBarActive ? 'expanded-button login-button' : 'collapsed-button login-button'">
-      <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" class="icon" />
-      <span v-if="isSideBarActive" class="text" style="margin-left: 8px; font-weight: 450;">로그인</span>
-    </router-link>
-
-    <!-- 유저 정보 및 로그아웃 버튼: 로그인된 경우 표시 -->
-    <div v-if="isLoggedIn" :class="isSideBarActive ? 'expanded-button' : 'collapsed-button'" class="user_info">
-      <router-link to="/user/myPage">
-        <img 
-          :src="userProfile.data.img || defaultProfileImage"
-          alt="user"
-          style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #CCCCD6;" />
-        <span v-if="isSideBarActive" class="text sideToggle" style="margin-left: 8px; font-weight: 550;">{{ userProfile.data.nickname }}</span>
-      </router-link>
-    </div>
-
-    <!-- 로그아웃 버튼: 클릭하면 로그아웃 및 리다이렉트 -->
-    <div v-if="isLoggedIn" @click="logout">
-      <div :class="isSideBarActive ? 'expanded-button login-button' : 'collapsed-button login-button'">
+      <router-link v-if="!isLoggedIn" to="/user/signin" :class="isSideBarActive ? 'expanded-button login-button' : 'collapsed-button login-button'">
         <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" class="icon" />
-        <span v-if="isSideBarActive" class="text" style="margin-left: 8px; font-weight: 550;">로그아웃</span>
-      </div>
+        <span v-if="isSideBarActive" class="text" style="margin-left: 8px; font-weight: 450;">로그인</span>
+      </router-link>
+      
+      <!-- <div v-if="isLoggedIn" :class="isSideBarActive ? 'expanded-user' : 'collapsed-user'">
+        <div class="user-info" :class="isSideBarActive ? 'expanded-user' : 'collapsed-user'">
+          <font-awesome-icon :icon="['fas', 'user']" class="icon" />
+          <div v-if="isSideBarActive">
+            <p class="user-name">{{ user.name }}</p>
+            <p class="user-email">{{ user.email }}</p>
+          </div>
+        </div> -->
+
+
+       
+          <div v-if="isLoggedIn" :class="isSideBarActive ? 'expanded-button' : 'collapsed-button'" class="user_info">
+            <router-link to="/user/myPage" >
+              <img 
+                src="../assets/images/navbar-rich.png" 
+                alt="user"
+                style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #CCCCD6;" />
+                <span v-if="isSideBarActive"class="text sideToggle" style="margin-left: 8px; font-weight: 550;">rla</span>
+            </router-link>
+            </div>
+
+        
+        <div v-if="isLoggedIn" @click="logout">
+          <div :class="isSideBarActive ? 'expanded-button login-button' : 'collapsed-button login-button'">
+            <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" class="icon" />
+            <span v-if="isSideBarActive" class="text" style="margin-left: 8px; font-weight: 550;">로그아웃</span>
+          </div>
+        </div>
+
     </div>
-  </div>
+    
   </aside>
 </template>
 
 <script>
-import { useAuthStore } from '@/stores/auth';
-import {watch} from 'vue';
+// import fullLogo from 'src/assets/images/navbar-full-rich.png'; // 전체 로고
+// import collapsedLogo from 'src/assets/images/navbar-rich.png'; // 축소 로고
 
 export default {
   data() {
     return {
-      fullLogoUrl: new URL('@/assets/images/navbar-full-rich.png', import.meta.url).href,
-      logoUrl: new URL('@/assets/images/navbar-rich.png', import.meta.url).href,
+      fullLogoUrl : new URL('@/assets/images/navbar-full-rich.png', import.meta.url).href,
+      logoUrl : new URL('@/assets/images/navbar-rich.png', import.meta.url).href,
       isAssetMenuOpen: false,
       isIncomeMenuOpen: false,
       isInvestMenuOpen: false,
       isGoalMenuOpen: false,
       isCommunityMenuOpen: false,
-      isSideBarActive: false, // 초기값: 사이드바 축소 상태
-    };
-  },
-  computed: {
-    // authStore의 상태를 가져오는 computed 프로퍼티
-    isLoggedIn() {
-      return this.authStore.isLoggedIn;
-    },
-    userProfile() {
-      return this.authStore.userProfile || { img: this.defaultProfileImage, nickname: 'Unknown' };
-    },
+      isSideBarActive: false // 초기값: 사이드바 축소 상태
+    }
   },
   methods: {
     toggleAssetMenu() {
-      this.isAssetMenuOpen = !this.isAssetMenuOpen;
-      this.isIncomeMenuOpen = false;
-      this.isInvestMenuOpen = false;
-      this.isGoalMenuOpen = false;
-      this.isCommunityMenuOpen = false;
+      this.isAssetMenuOpen = !this.isAssetMenuOpen
+      this.isIncomeMenuOpen = false
+      this.isInvestMenuOpen = false
+      this.isGoalMenuOpen = false
+      this.isCommunityMenuOpen = false
     },
     toggleIncomeMenu() {
-      this.isIncomeMenuOpen = !this.isIncomeMenuOpen;
-      this.isAssetMenuOpen = false;
-      this.isInvestMenuOpen = false;
-      this.isGoalMenuOpen = false;
-      this.isCommunityMenuOpen = false;
+      this.isIncomeMenuOpen = !this.isIncomeMenuOpen
+      this.isAssetMenuOpen = false
+      this.isInvestMenuOpen = false
+      this.isGoalMenuOpen = false
+      this.isCommunityMenuOpen = false
     },
     toggleInvestMenu() {
-      this.isInvestMenuOpen = !this.isInvestMenuOpen;
-      this.isAssetMenuOpen = false;
-      this.isIncomeMenuOpen = false;
-      this.isGoalMenuOpen = false;
-      this.isCommunityMenuOpen = false;
+      this.isInvestMenuOpen = !this.isInvestMenuOpen
+      this.isAssetMenuOpen = false
+      this.isIncomeMenuOpen = false
+      this.isGoalMenuOpen = false
+      this.isCommunityMenuOpen = false
     },
     toggleGoalMenu() {
-      this.isGoalMenuOpen = !this.isGoalMenuOpen;
-      this.isAssetMenuOpen = false;
-      this.isIncomeMenuOpen = false;
-      this.isInvestMenuOpen = false;
-      this.isCommunityMenuOpen = false;
+      this.isGoalMenuOpen = !this.isGoalMenuOpen
+      this.isAssetMenuOpen = false
+      this.isIncomeMenuOpen = false
+      this.isInvestMenuOpen = false
+      this.isCommunityMenuOpen = false
     },
     toggleCommunityMenu() {
-      this.isCommunityMenuOpen = !this.isCommunityMenuOpen;
-      this.isAssetMenuOpen = false;
-      this.isIncomeMenuOpen = false;
-      this.isInvestMenuOpen = false;
-      this.isGoalMenuOpen = false;
+      this.isCommunityMenuOpen = !this.isCommunityMenuOpen
+      this.isAssetMenuOpen = false
+      this.isIncomeMenuOpen = false
+      this.isInvestMenuOpen = false
+      this.isGoalMenuOpen = false
     },
     expandSidebar() {
-      this.isSideBarActive = true; // 사이드바 확장
+      this.isSideBarActive = true // 사이드바 확장
     },
     collapseSidebar() {
-      this.isSideBarActive = false; // 사이드바 축소
-      this.isAssetMenuOpen = false;
-      this.isIncomeMenuOpen = false;
-      this.isInvestMenuOpen = false;
-      this.isGoalMenuOpen = false;
-      this.isCommunityMenuOpen = false;
+      this.isSideBarActive = false // 사이드바 축소
+      this.isAssetMenuOpen = false
+      this.isIncomeMenuOpen = false
+      this.isInvestMenuOpen = false
+      this.isGoalMenuOpen = false
+      this.isCommunityMenuOpen = false
     },
     checkLoginStatus() {
+      // localStorage에 토큰이 있는지 확인하여 로그인 상태 설정
       const token = localStorage.getItem('authToken');
       this.isLoggedIn = !!token;
     },
     logout() {
-      // 로그아웃 시 localStorage에서 토큰 삭제 후 로그인 페이지로 리디렉션
-      this.authStore.logout();
+      // 로그아웃 시 localStorage 및 sessionStorage에서 모든 세션 정보 삭제
+      localStorage.removeItem('authToken');  // localStorage에서 authToken 삭제
+      sessionStorage.clear();  // sessionStorage 전체 삭제
+      
+      // 상태 초기화 및 리디렉션
+      this.isLoggedIn = false;
       this.$router.push('/user/signin');
-    },
+      
+      alert('로그아웃 되었습니다.');
+    }
   },
-  mounted() {
-    // 컴포넌트가 마운트되었을 때 사용자 프로필 정보를 가져옴
-    this.authStore.fetchUserProfile();
+  mounted(){
+    this.checkLoginStatus();
   },
-  setup() {
-    const authStore = useAuthStore(); // Pinia 스토어 사용
-    
-    // 로그인 상태를 watch로 감시하여 업데이트
-    watch(
-      () => authStore.isLoggedIn, // isLoggedIn 상태 감시
-      (newValue) => {
-        if (newValue) {
-          authStore.fetchUserProfile(); // 로그인된 상태면 프로필 정보를 다시 가져옴
-        }
-      }
-    );
-    
-    return { authStore };
-  },
-};
+  watch: {
+    // 페이지가 바뀔 때마다 로그인 상태 확인
+    $route() {
+      this.checkLoginStatus();
+    }
+  }
+}
 </script>
 
 <style scoped>

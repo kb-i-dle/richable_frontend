@@ -84,7 +84,8 @@
               ref="tooltipButton"
               type="button"
               data-bs-toggle="tooltip"
-              data-bs-placement="right"
+              data-bs-placement="left"
+              :title="tooltipMessage"
             >
               <font-awesome-icon icon="circle-question" style="font-size: 25px" />
             </button>
@@ -106,13 +107,13 @@
             <!-- 이번 달 소비 중 줄일 수 있는 소비는 -->
             {{
               saveAmount.value - possibleSaveAmount.value > 0
-                ? '이번 달 소비 중 줄일 수 있는 소비는 '
-                : '이번달에 아낀 소비는 '
+                ? '이번 달 소비 중 줄일 수 있는 소비는 😢'
+                : '이번달에 아낀 소비는 😲'
             }}
             <span style="font-size: 18px; font-weight: 500; color: #ff0062">
               {{ Math.abs(couldsaving).toLocaleString() }}</span
             >
-            원 이에요 😲
+            원 이에요.
           </div>
 
           <div class="consume-title">
@@ -132,7 +133,8 @@
               ref="tooltipButton2"
               type="button"
               data-bs-toggle="tooltip"
-              data-bs-placement="right"
+              data-bs-placement="left"
+              :title="tooltipMessage2"
             >
               <font-awesome-icon icon="circle-question" style="font-size: 25px" />
             </button>
@@ -146,14 +148,14 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { Chart, registerables } from 'chart.js'
+import { Chart, registerables, Tooltip } from 'chart.js'
 import { nextTick } from 'vue'
 import axiosInstance from '@/AxiosInstance'
 import { useMonthStore } from '@/stores/consume/curMonth.js'
 import { Tooltip as BootstrapTooltip } from 'bootstrap'
 
 // 차트.js 등록
-Chart.register(...registerables);
+Chart.register(...registerables)
 
 // pinia store 사용
 // 달별 네비게이션
@@ -185,20 +187,9 @@ const possibleSaveAmount = ref([]) // 빈 배열로 초기화
 const saveAmount = ref([]) // 빈 배열로 초기화
 
 const tooltipButton = ref(null) // 툴팁 버튼
-const tooltipButton2 = ref(null) // 툴팁 버튼
 const tooltipInstance = ref(null) // 툴팁 인스턴스
-const tooltipInstance2 = ref(null) // 툴팁 인스턴스
 const tooltipMessage = ref('평균값은 KOSIS 산업별 가구당 월 [평균] 가계수지 입니다.')
 const tooltipMessage2 = ref('이번달에 아낀 소비를 6개월 뒤 까지 누적으로 합산합니다.')
-
-
-watch(() => tooltipButton2.value, (newVal) => {
-  if (newVal) {
-    newVal.setAttribute('title', tooltipMessage2.value);
-    tooltipInstance2.value = new BootstrapTooltip(newVal);
-    console.log('Tooltip 2 initialized');
-  }
-});
 
 // 통화 포맷 함수
 const formatCurrency = (amount) => {
@@ -494,20 +485,6 @@ const createSavingChart = (months, saveAmount, possibleSaveAmount) => {
 
 // 페이지 로드 시 데이터 가져오기
 onMounted(() => {
-  nextTick(() => {
-    // 첫 번째 툴팁 초기화
-    if (tooltipButton.value) {
-      tooltipButton.value.setAttribute('title', tooltipMessage.value);
-      tooltipInstance.value = new BootstrapTooltip(tooltipButton.value);
-    }
-
-    // 두 번째 툴팁 초기화
-    if (tooltipButton2.value) {
-      tooltipButton2.value.setAttribute('title', tooltipMessage2.value);
-      tooltipInstance2.value = new BootstrapTooltip(tooltipButton2.value);
-    }
-  });
-  
   fetchComparisonData() // 초기 로드 시 데이터 가져오기
   fetchCouldSaving() // 절약 가능 금액 데이터 가져오기
   fetchSimulationData() // 시뮬레이션 데이터 가져오기

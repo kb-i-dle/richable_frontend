@@ -18,7 +18,7 @@
                 ref="tooltipButton"
                 type="button"
                 data-bs-toggle="tooltip"
-                data-bs-placement="right"
+                data-bs-placement="left"
                 :title="tooltipMessage"
               >
                 <font-awesome-icon icon="circle-question" style="font-size: 25px" />
@@ -58,14 +58,14 @@
     <div v-else>
       <div class="cha-title">
         <div class="cha-title-sub">
-          <strong>{{ nickname }}</strong>님은 <p style="display: inline; color: #ff0062;">{{ tendency }}</p>이군요.
+          "{{ nickname }}"님은 <p style="display: inline; color: #ff0062;">{{ tendency }}</p>이군요.
         </div>
         <div class="cha-title-main">
           <template v-if="tendency === '공격형'">
-             <span style="color: #ff0062;">채권/예금</span> 상품을 추천해드려요.
+            {{ tendency }} 이므로 <span style="color: #ff0062;">채권/예금</span> 상품을 추천해드려요.
           </template>
           <template v-else-if="tendency === '안정형'">
-            <span style="color: #ff0062;">주식/코인</span> 상품을 추천해드려요.
+            {{ tendency }} 이므로 <span style="color: #ff0062;">주식/코인</span> 상품을 추천해드려요.
           </template>
           <template v-else>
             다양한 상품을 추천해드려요.
@@ -91,7 +91,7 @@
               <p :class="getRiskClass(product.prodCategroy)">위험도 {{ getRiskLevel(product.prodCategroy) }}</p>
               <div class="product-name mb-2 text-muted">{{ product.name }}</div>
               <div style="display: flex; justify-content: space-between;">
-                <p class="product-price"><strong>{{ product.price.toLocaleString() }}원</strong></p>
+                <p class="product-price">{{ product.price.toLocaleString() }}원</p>
                 <p class="unit-price text-muted">단위당 가격</p>
               </div>
             </div>
@@ -103,9 +103,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted } from 'vue';
 import axiosInstance from '@/AxiosInstance';
-import { Chart, registerables } from 'chart.js'
+import { Chart, registerables, Tooltip } from 'chart.js'
 import { Tooltip as BootstrapTooltip } from 'bootstrap'
 
 const availableCash = ref(0); // 여유 자금
@@ -121,11 +121,6 @@ const scrollContainer = ref(null);
 const isDragging = ref(false);
 const startX = ref(0);
 const scrollLeft = ref(0);
-
-const tooltipButton = ref(null) // 툴팁 버튼
-const tooltipInstance = ref(null) // 툴팁 인스턴스
-const tooltipMessage = ref('여유자금은 보유 현금과 입출금 통장 금액의 합산입니다')
-
 
 // 마우스 드래그 시작 시 호출
 const startDragging = (e) => {
@@ -165,13 +160,7 @@ const getRiskClass = (category) => {
 
 onMounted(() => {
   const token = localStorage.getItem('authToken'); // JWT 토큰 가져오기
-  nextTick(() => {
-    // 첫 번째 툴팁 초기화
-    if (tooltipButton.value) {
-      tooltipButton.value.setAttribute('title', tooltipMessage.value);
-      tooltipInstance.value = new BootstrapTooltip(tooltipButton.value);
-    }
-  });
+
   if (token) {
     // 전체 자산 가져오기
     axiosInstance.get('/finance/total/sum')
@@ -507,8 +496,8 @@ button:hover {
 
 .tooltip-box {
   position: absolute;
-  right: -570px;
-  top: -80px;
+  right: -200px;
+  top: 0;
   z-index: 10;
 }
 

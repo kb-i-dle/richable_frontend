@@ -11,7 +11,7 @@
               ref="tooltipButton"
               type="button"
               data-bs-toggle="tooltip"
-              data-bs-placement="right"
+              data-bs-placement="left"
               :title="tooltipMessage"
             >
               <font-awesome-icon icon="circle-question" style="font-size: 25px" />
@@ -48,13 +48,14 @@ import {
   PointElement,
   LineController,
   CategoryScale,
-  LinearScale
+  LinearScale,
+  Tooltip
 } from 'chart.js'
 import { nextTick, onMounted, ref, watch } from 'vue'
 import axiosinstance from '@/AxiosInstance'
 import { Tooltip as BootstrapTooltip } from 'bootstrap'
 
-ChartJS.register(LineElement, PointElement, LineController, CategoryScale, LinearScale)
+ChartJS.register(LineElement, PointElement, LineController, CategoryScale, LinearScale, Tooltip)
 
 const month = useMonthStore()
 const lineChart = ref(null)
@@ -211,25 +212,14 @@ const renderLineChart = async () => {
   })
 }
 
-// onMounted 로직 결합
-onMounted(async () => {
-  // 차트 생성 및 데이터 요청
-  await renderLineChart()
-
-  nextTick(() => {
-    // 툴팁 초기화
-    if (tooltipButton.value) {
-      tooltipButton.value.setAttribute('title', tooltipMessage.value)
-      tooltipInstance.value = new BootstrapTooltip(tooltipButton.value)
-    }
-  })
+onMounted(() => {
+  renderLineChart()
 })
 
-// 달(month)이 바뀔 때마다 차트 다시 렌더링
 watch(
   () => month.month,
-  async () => {
-    await renderLineChart()
+  () => {
+    renderLineChart()
   }
 )
 </script>

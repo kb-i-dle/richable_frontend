@@ -327,7 +327,7 @@ html {
 .image-content-asset {
   flex: 1;
   text-align: right;
-  background-image: url('../assets/images/laptop-assetanalysis.png');
+  background-image: url('../assets/images/laptop-rich.png');
   background-size: cover;
   height: 350px;
   width: 585px;
@@ -338,7 +338,7 @@ html {
 .image-content-consume {
   flex: 1;
   text-align: right;
-  background-image: url('../assets/images/laptop-outcomeanalysis.png');
+  background-image: url('../assets/images/laptop-rich.png');
   background-size: cover;
   height: 350px;
   width: 585px;
@@ -349,7 +349,7 @@ html {
 .image-content-invest {
   flex: 1;
   text-align: right;
-  background-image: url('../assets/images/laptop-invest.png');
+  background-image: url('../assets/images/laptop-rich.png');
   background-size: cover;
   height: 350px;
   width: 585px;
@@ -360,7 +360,7 @@ html {
 .image-content-goal {
   flex: 1;
   text-align: right;
-  background-image: url('../assets/images/laptop-goal.png');
+  background-image: url('../assets/images/laptop-rich.png');
   background-size: cover;
   height: 350px;
   width: 585px;
@@ -371,7 +371,7 @@ html {
 .image-content-community {
   flex: 1;
   text-align: right;
-  background-image: url('../assets/images/laptop-community.png');
+  background-image: url('../assets/images/laptop-rich.png');
   background-size: cover;
   height: 350px;
   width: 585px;

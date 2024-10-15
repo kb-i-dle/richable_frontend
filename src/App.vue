@@ -58,9 +58,9 @@ const pageTitle = computed(() => {
           <a href="#">Contact Us</a>
         </div>
         <div class="social-icons">
-          <a href="https://github.com/kb-i-dle" target="_blank">
-            <img src="../src/assets/images/github-mark-white.svg" alt="github" />
-          </a>
+          <a href="#"><img src="../src/assets/images/navbar-rich.png" alt="Facebook" /></a>
+          <a href="#"><img src="../src/assets/images/navbar-rich.png" alt="Twitter" /></a>
+          <a href="#"><img src="../src/assets/images/navbar-rich.png" alt="Instagram" /></a>
         </div>
       </div>
     </footer>
