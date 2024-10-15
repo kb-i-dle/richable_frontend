@@ -4,19 +4,19 @@
     @mouseleave="collapseSidebar"
     :class="{ active: isSideBarActive }"
   >
-    <div :class="isSideBarActive ? 'expanded-logo' : 'collapsed-logo'">
+     <div :class="isSideBarActive ? 'expanded-logo' : 'collapsed-logo'">
       <router-link to="/">
         <img
           :src="
             isSideBarActive
-              ? '/src/assets/images/navbar-full-rich.png'
-              : '/src/assets/images/navbar-rich.png'
+              ? fullLogoUrl
+              : logoUrl
           "
           alt="로고"
         />
       </router-link>
     </div>
-
+    
     <div class="menu">
 
         <div  @mouseenter="toggleAssetMenu" @mouseleave="toggleAssetMenu" class="wrapButton">
@@ -130,7 +130,7 @@
                 src="../assets/images/navbar-rich.png" 
                 alt="user"
                 style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #CCCCD6;" />
-                <span v-if="isSideBarActive"class="text sideToggle" style="margin-left: 8px; font-weight: 550;">김리치</span>
+                <span v-if="isSideBarActive"class="text sideToggle" style="margin-left: 8px; font-weight: 550;">rla</span>
             </router-link>
             </div>
 
@@ -148,9 +148,14 @@
 </template>
 
 <script>
+// import fullLogo from 'src/assets/images/navbar-full-rich.png'; // 전체 로고
+// import collapsedLogo from 'src/assets/images/navbar-rich.png'; // 축소 로고
+
 export default {
   data() {
     return {
+      fullLogoUrl : new URL('@/assets/images/navbar-full-rich.png', import.meta.url).href,
+      logoUrl : new URL('@/assets/images/navbar-rich.png', import.meta.url).href,
       isAssetMenuOpen: false,
       isIncomeMenuOpen: false,
       isInvestMenuOpen: false,

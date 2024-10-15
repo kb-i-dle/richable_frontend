@@ -402,6 +402,8 @@ const toggleAll = () => {
   agreePrivacyPolicy.value = agreeToAll.value
 }
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL + "/member"
+
 const submitAgreement = async () => {
   if (!canProceed.value) {
     alert('모든 약관에 동의해주세요.')
@@ -412,7 +414,7 @@ const submitAgreement = async () => {
   const userId = route.params.id
 
   try {
-    const response = await axios.post(`http://localhost:8080/member/agree/${userId}`, {
+    const response = await axios.post(`${BASE_URL}/agree/${userId}`, {
       info: agreeServiceTerms.value,
       finance: agreePrivacyPolicy.value
     })

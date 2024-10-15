@@ -1,21 +1,18 @@
 <template>
-<div class="wrap">
+  <div class="wrap">
     <div class="intro_bg">
-      
       <div class="text-center main-container">
         <div class="main-title">나만의 쉬운 금융메이트</div>
         <div class="sub-title">리치블</div>
       </div>
 
-      <div class="img-container"> <!-- 이미지 감싸는 컨테이너 추가 -->
-        <div class="img"></div>
+      <div class="img-container">
+        <!-- 이미지 감싸는 컨테이너 추가 -->
+        <div class="img" :style="{ backgroundImage: 'url(' + richImage + ')' }"></div>
       </div>
 
-      <button id="start-btn">시작하기</button>
-
+      <button id="start-btn" @click="goToSignIn">시작하기</button>
     </div>
-
-
 
     <div class="mid">
       <ul class="mid-nav">
@@ -43,9 +40,12 @@
         <div class="text-content">
           <h2 class="title">자산</h2>
           <p class="description">나의 자산을 한 눈에 <br />모아볼 수 있어요.</p>
-          <p class="description-sub">예/적금, 주식, 채권, 코인, 현물자산 등<br/> 나의 모든 자산을 확인하세요.</p>
+          <p class="description-sub">
+            예/적금, 주식, 채권, 코인, 현물자산 등<br />
+            나의 모든 자산을 확인하세요.
+          </p>
         </div>
-        <div class="image-content"></div>
+        <div class="image-content-asset"></div>
       </div>
     </div>
 
@@ -59,10 +59,11 @@
             분석하고 절약해요.
           </p>
           <p class="description-sub">
-            한 달 동안의 소비를 확인하고 <br> 줄여야 될 소비를 볼 수 있어요.
+            한 달 동안의 소비를 확인하고 <br />
+            줄여야 될 소비를 볼 수 있어요.
           </p>
         </div>
-        <div class="image-content"></div>
+        <div class="image-content-consume"></div>
       </div>
     </div>
 
@@ -72,12 +73,16 @@
         <div class="text-content">
           <h2 class="title">투자</h2>
 
-          <p class="description">나의 투자현황을 <br /> 확인해보세요.</p>
+          <p class="description">
+            나의 투자유형을 <br />
+            확인해보세요.
+          </p>
           <p class="description-sub">
-            나의 여유자금을 확인하고 <br> 투자유형에 맞는 투자상품을 추천받아요.
+            나의 여유자금을 확인하고 <br />
+            투자유형에 맞는 투자상품을 추천받아요.
           </p>
         </div>
-        <div class="image-content"></div>
+        <div class="image-content-invest"></div>
       </div>
     </div>
 
@@ -88,10 +93,11 @@
           <h2 class="title">목표</h2>
           <p class="description">나의 목표를 설정해요.</p>
           <p class="description-sub">
-            나의 자산/소비 목표를 설정하고 <br> 이를 관리해요.
+            나의 자산/소비 목표를 설정하고 <br />
+            이를 관리해요.
           </p>
         </div>
-        <div class="image-content"></div>
+        <div class="image-content-goal"></div>
       </div>
     </div>
 
@@ -102,33 +108,50 @@
           <h2 class="title">커뮤니티</h2>
 
           <p class="description">
-            다른 사람들은 어떻게  <br /> 자산을 모을까요?
-          </p>
-          
-          <p class="description-sub">
-            1억 이상의 자산을 가진 리치들의 <br> 자산 관리 노하우를 들어봐요!
+            다른 사람들은 어떻게 <br />
+            자산을 모을까요?
           </p>
 
+          <p class="description-sub">
+            1억 이상의 자산을 가진 리치들의 <br />
+            자산 관리 노하우를 들어봐요!
+          </p>
         </div>
-        <div class="image-content"></div>
+        <div class="image-content-community"></div>
       </div>
     </div>
   </div>
-  
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
+import richImage from '@/assets/images/rich.png'
+import {useRouter} from 'vue-router'
+import axiosInstance from '@/AxiosInstance';
 
-const activeIndex = ref(0);
+const activeIndex = ref(0)
+const router = useRouter()
 
 function setActive(index, sectionId) {
-  activeIndex.value = index;
-  const section = document.querySelector(sectionId);
+  activeIndex.value = index
+  const section = document.querySelector(sectionId)
   if (section) {
-    section.scrollIntoView({ behavior: 'smooth' });
+    section.scrollIntoView({ behavior: 'smooth' })
   }
 }
+
+async function goToSignIn() {
+  const token = localStorage.getItem('authToken'); // 또는 sessionStorage에서 토큰을 가져옴
+  console.log(token);
+  if (token) {
+    // 토큰이 있으면 자산 분석 페이지로 이동
+    router.push({ path: '/asset/analysis' });
+  } else {
+    // 토큰이 없으면 로그인 페이지로 이동
+    router.push({ path: '/user/signin' });
+  }
+}
+
 </script>
 
 <style scoped>
@@ -146,7 +169,7 @@ html {
 }
 
 .intro_bg {
-  background: linear-gradient(180deg, #FFF 0%, #FFF2F6 100%);
+  background: linear-gradient(180deg, #fff 0%, #fff2f6 100%);
   width: 100%;
   height: 640px;
   position: relative;
@@ -155,13 +178,12 @@ html {
   align-items: center; /* 수평 중앙 정렬 */
 }
 
-.main-container{
+.main-container {
   margin-top: 100px;
-
 }
 
-.main-title{
-  color: var(--black-default, #19181D);
+.main-title {
+  color: var(--black-default, #19181d);
   text-align: center;
   font-family: Pretendard;
   font-size: 30px;
@@ -171,8 +193,8 @@ html {
   letter-spacing: -0.8px;
 }
 
-.sub-title{
-  color: var(--black-default, #19181D);
+.sub-title {
+  color: var(--black-default, #19181d);
   text-align: center;
   font-family: Pretendard;
   font-size: 30px;
@@ -196,7 +218,6 @@ html {
   height: 170px; /* 높이 설정 */
   width: 188px; /* 너비 설정 */
 }
-
 
 #start-btn {
   width: 150px;
@@ -249,7 +270,7 @@ html {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding:  0;
+  padding: 0;
   background-color: #fff;
 }
 
@@ -262,7 +283,6 @@ html {
   padding: 20px;
   margin-top: px; /* 상단에서 150px 떨어지게 설정 */
 }
-
 
 .text-content {
   flex: 1;
@@ -305,4 +325,58 @@ html {
   border-radius: 20px;
 }
 
+.image-content-asset {
+  flex: 1;
+  text-align: right;
+  background-image: url('../assets/images/laptop-rich.png');
+  background-size: cover;
+  height: 350px;
+  width: 585px;
+  box-shadow: 0px 4px 8px rgba(25, 24, 29, 0.1);
+  border-radius: 20px;
+}
+
+.image-content-consume {
+  flex: 1;
+  text-align: right;
+  background-image: url('../assets/images/laptop-rich.png');
+  background-size: cover;
+  height: 350px;
+  width: 585px;
+  box-shadow: 0px 4px 8px rgba(25, 24, 29, 0.1);
+  border-radius: 20px;
+}
+
+.image-content-invest {
+  flex: 1;
+  text-align: right;
+  background-image: url('../assets/images/laptop-rich.png');
+  background-size: cover;
+  height: 350px;
+  width: 585px;
+  box-shadow: 0px 4px 8px rgba(25, 24, 29, 0.1);
+  border-radius: 20px;
+}
+
+.image-content-goal {
+  flex: 1;
+  text-align: right;
+  background-image: url('../assets/images/laptop-rich.png');
+  background-size: cover;
+  height: 350px;
+  width: 585px;
+  box-shadow: 0px 4px 8px rgba(25, 24, 29, 0.1);
+  border-radius: 20px;
+}
+
+.image-content-community {
+  flex: 1;
+  text-align: right;
+  background-image: url('../assets/images/laptop-rich.png');
+  background-size: cover;
+  height: 350px;
+  width: 585px;
+  box-shadow: 0px 4px 8px rgba(25, 24, 29, 0.1);
+  border-radius: 20px;
+}
 </style>

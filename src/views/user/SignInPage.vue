@@ -1,7 +1,7 @@
 <template>
   <div id="singin" class="login-container">
     <img class="title" src="../../assets/images/navbar-full-rich.png" />
-    <form @submit.prevent="login">
+    <form @submit.prevent="login" method="POST">
       <div class="mb-3 text-start">
         <label for="id" class="form-label">아이디</label>
         <input
@@ -16,23 +16,25 @@
       <div class="mb-3 text-start position-relative">
         <label for="password" class="form-label">비밀번호</label>
         <div class="password-input-wrapper position-relative">
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            v-model="password"
-            class="form-control"
-            id="password"
-            placeholder="비밀번호를 입력해주세요"
-            required
-          />
-          <span
-            @click="togglePassword"
-            class="position-absolute top-50 end-0 translate-middle-y pe-2"
-            style="cursor: pointer"
-            :aria-label="showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'"
-          >
-            <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-          </span>
-        </div>
+    <input
+      :type="showPassword ? 'text' : 'password'"
+      v-model="password"
+      class="form-control"
+      id="password"
+      placeholder="비밀번호를 입력해주세요"
+      required
+    />
+    <span
+      @click="togglePassword"
+      class="position-absolute top-50 end-0 translate-middle-y pe-2"
+      style="cursor: pointer"
+      :aria-label="showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'"
+    >
+      <font-awesome-icon 
+        :icon="showPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']" 
+      />
+    </span>
+  </div>
       </div>
       <button type="submit" class="login-btn" :disabled="!id || !password">로그인</button>
     </form>
@@ -42,10 +44,9 @@
       <span class="mx-2"> | </span>
       <router-link to="/user/findpassword" class="join-link">비밀번호 찾기</router-link>
     </div>
-    <div class="or-divider">또는</div>
+    <div class="or-divider">또는</div> 
 
     <div class="sns-buttons">
-      <img src="https://via.placeholder.com/40?text=K" alt="Kakao" />
       <img src="../../assets/images/naver.png" alt="Naver" @click="naverLogin" />
     </div>
 
@@ -59,21 +60,26 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import axiosinstance from '@/AxiosInstance';
 
 const id = ref('')
 const password = ref('')
 const showPassword = ref(true)
 const router = useRouter()
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL + "/member"
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
+const setAuthToken = (key, value) => new Promise((resolve) => {
+  localStorage.setItem(key,value);
+  resolve();
+})
 
 const naverLogin = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/naverlogin`)
+    const response = await axiosinstance.get(`/member/naverlogin`)
     console.log('Naver login response:', response.data)
     if (response.data.success && response.data.response?.data?.redirectUrl) {
       localStorage.setItem('naverState', response.data.response.data.state)
@@ -88,65 +94,25 @@ const naverLogin = async () => {
   }
 }
 
-const handleNaverCallback = async () => {
-  const urlParams = new URLSearchParams(window.location.search)
-  const code = urlParams.get('code')
-  const state = urlParams.get('state')
-
-  if (code && state) {
-    try {
-      const savedState = localStorage.getItem('naverState')
-      if (state !== savedState) {
-        throw new Error('Invalid state')
-      }
-
-      const response = await axios.get(`${BASE_URL}/naverCallback`, { params: { code, state } })
-      if (response.data.success && response.data.response?.data?.token) {
-        const { token, userInfo } = response.data.response.data
-        console.log('Naver login success:', token)
-        alert('네이버 로그인 성공!')
-        sessionStorage.setItem('authToken', token)
-        localStorage.removeItem('naverState') // 사용 후 state 제거
-        // 인증 헤더 설정
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-
-        localStorage.removeItem('naverState') // 사용 후 state 제거
-
-        // 리다이렉트 URL로 이동
-        if (redirectUrl) {
-          window.location.href = redirectUrl // 전체 페이지 리로드
-        } else {
-          router.push({ name: 'home' })
-        }
-      } else {
-        throw new Error('Invalid response format')
-      }
-    } catch (error) {
-      console.error('Naver login callback failed:', error)
-      alert(`네이버 로그인 처리 중 오류: ${error.response?.data?.error || error.message}`)
-      router.push({ name: 'login' }) // 로그인 페이지로 리다이렉트
-    }
-  }
-}
-
 const login = async () => {
   if (!id.value || !password.value) {
     alert('아이디와 비밀번호를 모두 입력해주세요')
     return
   }
   try {
-    const response = await axios.post(`/api/member/login`, {
+    const response = await axiosinstance.post(`/member/login` , {
       id: id.value,
       password: password.value
     });
+    
+    
     // 응답 데이터 구조에 따라 토큰 추출
     if (response.data.success && response.data.response?.data?.token) {
       const token = response.data.response.data.token;
       console.log('Token received:', token);
       // 로그인 성공 시 처리
       alert('Login successful!');
-      localStorage.setItem('authToken', token);
-      router.push({ name: 'home' });
+      await setAuthToken("authToken", token).then(() => router.push({ name: 'assetAnalysis' }));
     } else {
       throw new Error('Invalid response format');
     }
@@ -156,7 +122,6 @@ const login = async () => {
   }
 }
 onMounted(() => {
-  handleNaverCallback()
   // 페이지 로드 시 저장된 토큰이 있다면 axios 헤더에 설정
   const token = localStorage.getItem('authToken')
   if (token) {

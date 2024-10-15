@@ -212,7 +212,8 @@
         </div>
       </div>
     </div>
-    <AssetCreateModal ref="createModal" />
+    <AssetCreateModal ref="createModal" 
+      @refresh-data="refreshData" />
     <AssetUpdateModal ref="editModal" />
     <TangibleAssetCreateModal ref="createModal2" @create-asset="handleCreateAsset" />
     <TangibleAssetUpdateModal
@@ -226,14 +227,21 @@
       :bond-data-list="bondDataList"
       :coin-data-list="coinDataList"
       :stock-data-list="stockDataList"
+      @refresh-data="refreshData"  
       ref="checkModal"
     />
+      
+    <AssetUpdateModal
+      ref="updateModal"
+      @update-asset="handleAssetUpdate"
+      @delete-asset="handleAssetDelete"
+    />
+
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, watch, nextTick, computed } from 'vue'
-import axios from 'axios'
 import axiosInstance from '@/AxiosInstance'
 import { Tooltip as BootstrapTooltip } from 'bootstrap'
 import { Chart, PieController, ArcElement, Tooltip, Legend } from 'chart.js'
@@ -415,6 +423,7 @@ watch(selectedTab, (newTab) => {
   else if (newTab === 'tab2') renderPieChart2()
 })
 
+
 // 모달 처리
 const createModal = ref(null)
 const editModal = ref(null)
@@ -465,26 +474,68 @@ const handleDeleteAsset = async (deletedAsset) => {
   await renderPieChart2();
 }
 
-// 금융 자산 총합
+const handleAssetUpdate = async (assetType, updatedAsset) => {
+  let targetList;
+  if (assetType === 'bank') {
+    targetList = bankDataList;
+  } else if (assetType === 'bond') {
+    targetList = bondDataList;
+  } else if (assetType === 'coin') {
+    targetList = coinDataList;
+  } else if (assetType === 'stock') {
+    targetList = stockDataList;
+  }
+
+  // 여기서 ref.value로 접근해야 함
+  const index = targetList.value.findIndex(asset => asset.index === updatedAsset.index);
+  if (index !== -1) {
+    targetList.value[index] = { ...updatedAsset };
+    console.log(`자산 ${assetType}이(가) 업데이트되었습니다.`);
+  } else {
+    console.warn(`해당 자산을 찾을 수 없습니다: ${updatedAsset.index}`);
+  }
+
+  await getFinanceList();
+  await fetchFinanceAmount();
+  await fetchFinanceAssetList();
+  await renderPieChart();
+};
+
+const handleAssetDelete = async (assetType, assetIndex) => {
+  let targetList;
+  if (assetType === 'bank') {
+    targetList = bankDataList;
+  } else if (assetType === 'bond') {
+    targetList = bondDataList;
+  } else if (assetType === 'coin') {
+    targetList = coinDataList;
+  } else if (assetType === 'stock') {
+    targetList = stockDataList;
+  }
+
+  // ref.value로 접근
+  targetList.value = targetList.value.filter(asset => asset.index !== assetIndex);
+  console.log(`${assetType} 자산이 삭제되었습니다.`);
+
+  await getFinanceList();
+  await fetchFinanceAmount();
+  await fetchFinanceAssetList();
+  await renderPieChart();
+};
+
+
+const refreshData = async () => {
+  console.log("데이터 새로고침 ");
+  await fetchFinanceAmount(); 
+  await getFinanceList();// 금융 자산 리스트 다시 불러오기
+  await fetchFinanceAssetList();
+  console.log("데이터 새로고침 완료");
+}
+
+
+
 const financeTotalAmount = ref(0)
 
-// // 총 금융 자산 현황 연동
-// const fetchFinanceAssetList = async () => {
-//   try {
-//     const response = await axios.get('http://localhost:8080/finance/fin/sum', {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("authToken")}`, // JWT 토큰을 Authorization 헤더에 추가
-//     }});
-
-//     console.log(response.data.response.data.data.amount);
-//     financeTotalAmount.value = response.data.response.data.data.amount;
-
-//   } catch (error) {
-//     console.error('금융 자산 합 조회 api 호출을 실패하였습니다. ', error);
-//   }
-// };
-
-// 총 금융 자산 현황 연동2
 const fetchFinanceAssetList = async () => {
   try {
     const response = await axiosInstance.get('/finance/fin/sum');
@@ -607,11 +658,12 @@ const fetchFinanceSpotList = async () => {
 }
 
 // 금융 자산별 목록 조회
-const getFinanceList = () => {
+const getFinanceList = async() => {
   fetchFinanceList('bank')
   fetchFinanceList('stock')
   fetchFinanceList('bond')
   fetchFinanceList('coin')
+  console.log("부르기")
 }
 
 // 현물 자산별 총합 조회

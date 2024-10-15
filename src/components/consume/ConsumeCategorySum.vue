@@ -77,9 +77,11 @@
   import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, DoughnutController } from 'chart.js';
   import { nextTick, onMounted, ref, watch } from 'vue';
   import axiosinstance from '@/AxiosInstance';
-  
+  import {useRouter} from 'vue-router'
+
   ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, DoughnutController);
   
+  const router = useRouter();
   const month = useMonthStore();
   const doughnutChart = ref(null);
   let chartInstance = null;
@@ -116,8 +118,7 @@
       selectedCategory.value = category;
       filteredItems.value = categories.value.slice(4);
     } else {
-      selectedCategory.value = category;
-      filteredItems.value = categories.value.filter(item => item.category === category.category);
+      router.push({ path: '/budget/list'});
     }
     showDetailModal.value = true;
   };
@@ -169,6 +170,7 @@
   
       categories.value = responseData.categorys || [];
       totalSum.value = responseData.sum || 0;
+      console.log(`total sum : ${totalSum.value}`);
   
       processCategories();
     } catch (error) {

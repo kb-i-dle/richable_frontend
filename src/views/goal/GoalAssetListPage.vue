@@ -1,8 +1,20 @@
 <template>
   <div class="goal-asset-list-page">
     <!-- Top Section: Goal Asset Progress -->
-    <section class="goal-progress-section goal-card">
+    <section class="goal-progress-section goal-card" style="position: relative">
       <!-- 빈 카드 표시 -->
+      <div class="tooltip-box" style="position: absolute; right: 10px; top: 10px">
+        <button
+          class="tool-btn"
+          ref="tooltipButton1"
+          type="button"
+          data-bs-toggle="tooltip"
+          data-bs-placement="left"
+          :title="tooltipMessage1"
+        >
+          <font-awesome-icon icon="circle-question" style="font-size: 25px" />
+        </button>
+      </div>
       <div
         v-if="!assetGoal || assetGoalDeleted || assetGoal.totalAmount === 0"
         class="goal-card empty-goal-card"
@@ -33,47 +45,68 @@
       </div>
     </section>
 
-    <div style="margin-top: 100px;">
-    <!-- Middle Section: Consumption Suggestion -->
-    <section class="text-left">
-      <div class="main-title">소비 목표를 세워 목표 자금을 형성할 수 있어요</div>
-      <div class="sub_title">우선순위별로 소비 목표가 달성돼요 😁</div>
-    </section>
-
-    <!-- 목표 카드 리스트 -->
-    <section class="goal-cards">
-      <div
-        v-for="(goal, index) in goals"
-        :key="goal.id"
-        class="goal-card"
-        :draggable="true"
-        @dragstart="onDragStart(goal, $event)"
-        @dragover.prevent
-        @drop="onDrop(goal)"
-        @click="openGoalDetailModal(goal)"
-      >
-        <p class="goal-index">{{ index + 1 }}. {{ goal.title }}</p>
-        <p class="goal-amount">{{ goal.totalAmount.toLocaleString() }}원 / {{ goal.gather.toLocaleString() }}원</p>
-        <div class="progress-bar">
+    <div style="margin-top: 100px">
+      <!-- Middle Section: Consumption Suggestion -->
+      <section class="text-left" style="position: relative">
+        <div class="main-title">소비 목표를 세워 목표 자금을 형성할 수 있어요</div>
+        <div class="sub_title">
+          우선순위별로 소비 목표가 달성돼요 😁
           <div
-            class="progress"
-            :style="{ width: (goal.gather / goal.totalAmount) * 100 + '%' }"
-          ></div>
+            class="tooltip-box"
+            style="display: inline-block; position: absolute; right: 0; top: 0"
+          >
+            <button
+              class="tool-btn"
+              ref="tooltipButton2"
+              type="button"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              :title="tooltipMessage2"
+            >
+              <font-awesome-icon icon="circle-question" style="font-size: 26px" />
+            </button>
+          </div>
         </div>
-        <p class="goal-progress">{{ ((goal.gather / goal.totalAmount) * 100).toFixed(2) }}% 달성</p>
-      </div>
+      </section>
 
-      <!-- Add Goal Button -->
-      <div class="goal-card add-goal" @click="openCreateModal">
-        <p>+</p>
-      </div>
-    </section>
+      <!-- 목표 카드 리스트 -->
+      <section class="goal-cards">
+        <div
+          v-for="(goal, index) in goals"
+          :key="goal.id"
+          class="goal-card"
+          :draggable="true"
+          @dragstart="onDragStart(goal, $event)"
+          @dragover.prevent
+          @drop="onDrop(goal)"
+          @click="openGoalDetailModal(goal)"
+        >
+          <p class="goal-index">{{ index + 1 }}. {{ goal.title }}</p>
+          <p class="goal-amount">
+            {{ goal.gather.toLocaleString() }}원 / {{ goal.totalAmount.toLocaleString() }}원
+          </p>
+          <div class="progress-bar">
+            <div
+              class="progress"
+              :style="{ width: (goal.gather / goal.totalAmount) * 100 + '%' }"
+            ></div>
+          </div>
+          <p class="goal-progress">
+            {{ ((goal.gather / goal.totalAmount) * 100).toFixed(2) }}% 달성
+          </p>
+        </div>
 
-    <!-- 달성된 목표 축하 메시지 -->
-    <div v-if="goalAchieved" class="goal-achieved-message">
-      🎉 목표를 달성했습니다! 축하합니다! 🎉
+        <!-- Add Goal Button -->
+        <div class="goal-card add-goal" @click="openCreateModal">
+          <p>+</p>
+        </div>
+      </section>
+
+      <!-- 달성된 목표 축하 메시지 -->
+      <div v-if="goalAchieved" class="goal-achieved-message">
+        🎉 목표를 달성했습니다! 축하합니다! 🎉
+      </div>
     </div>
-  </div>
 
     <!-- 모달 컴포넌트 -->
     <ConsumeGoalCreateModal ref="goalCreateModal" @registerGoal="addNewGoal" />
@@ -97,6 +130,14 @@ import ConsumeGoalDetailModal from '../../components/modal/goal/ConsumeGoalDetai
 import AssetGoalDetailModal from '../../components/modal/goal/AssetGoalDetailModal.vue'
 import AssetGoalCreateModal from '../../components/modal/goal/AssetGoalCreateModal.vue'
 import Instance from '@/AxiosInstance.js'
+import { Tooltip as BootstrapTooltip } from 'bootstrap'
+
+const tooltipButton1 = ref(null) // 툴팁 버튼
+const tooltipButton2 = ref(null) // 툴팁 버튼
+
+const tooltipInstance = ref(null) // 툴팁 인스턴스
+const tooltipMessage1 = ref('모은 돈은 목표 자산 설정 이후의 소득입니다.')
+const tooltipMessage2 = ref('소비 등록 이후 모은 돈이 계산됩니다.')
 
 // 로딩 상태
 const isLoading = ref(false)
@@ -115,16 +156,16 @@ const onDragStart = (goal, event) => {
 
 // 드롭 시 호출
 const onDrop = async (targetGoal) => {
-  const draggedIndex = goals.value.indexOf(draggedGoal);
-  const targetIndex = goals.value.indexOf(targetGoal);
+  const draggedIndex = goals.value.indexOf(draggedGoal)
+  const targetIndex = goals.value.indexOf(targetGoal)
 
   // 목표를 드래그한 후 새로운 위치로 이동
-  goals.value.splice(draggedIndex, 1); // 기존 위치에서 삭제
-  goals.value.splice(targetIndex, 0, draggedGoal); // 새 위치에 삽입
+  goals.value.splice(draggedIndex, 1) // 기존 위치에서 삭제
+  goals.value.splice(targetIndex, 0, draggedGoal) // 새 위치에 삽입
 
   // 드래그 후 모든 목표의 priority 값을 다시 설정
   for (let i = 0; i < goals.value.length; i++) {
-    goals.value[i].priority = i + 1;
+    goals.value[i].priority = i + 1
   }
 
   // 목표 우선순위 업데이트 API 호출
@@ -168,7 +209,7 @@ const addNewGoal = (newGoal) => {
     id: newId,
     title: newGoal.title,
     totalAmount: newGoal.totalAmount,
-    gather: 0 // 새로운 목표는 현재 모금액 0으로 시작
+    gather: 0
   })
   console.log('새로운 목표가 추가되었습니다!')
 }
@@ -209,8 +250,8 @@ const openAssetGoalDetailModal = () => {
   const goalData = {
     type: '자산',
     amount: assetGoal.value.totalAmount,
-    index: assetGoal.value.index, 
-    category: assetGoal.value.category 
+    index: assetGoal.value.index,
+    category: assetGoal.value.category
   }
   assetGoalDetailModal.value.show(goalData)
 }
@@ -234,9 +275,9 @@ const achieveGoal = (goalId) => {
   if (goalIndex !== -1) {
     goals.value.splice(goalIndex, 1)
     console.log('목표를 달성했습니다!')
-    goalAchieved.value = true  // 목표가 달성되면 메시지를 표시
+    goalAchieved.value = true // 목표가 달성되면 메시지를 표시
     setTimeout(() => {
-      goalAchieved.value = false  // 3초 후 메시지를 숨김
+      goalAchieved.value = false // 3초 후 메시지를 숨김
     }, 3000)
   }
 }
@@ -298,19 +339,49 @@ const fetchGoals = async () => {
 
 // 페이지 로드 시 목표 데이터를 가져옴
 onMounted(async () => {
-  await fetchAssetGoal()
-  await fetchGoals()
+  try {
+    await fetchAssetGoal()
+    await fetchGoals()
+
+    if (tooltipButton1.value) {
+      new BootstrapTooltip(tooltipButton1.value, {
+        trigger: 'hover',
+        placement: 'left',
+        template: `
+        <div class="tooltip" role="tooltip">
+          <div class="tooltip-arrow"></div>
+          <div class="tooltip-inner" style="max-width: none; width: auto; padding: 10px; font-size: 14px; white-space: normal;"></div>
+        </div>
+      `
+      })
+    }
+
+    if (tooltipButton2.value) {
+      new BootstrapTooltip(tooltipButton2.value, {
+        trigger: 'hover',
+        placement: 'top',
+        template: `
+        <div class="tooltip" role="tooltip">
+          <div class="tooltip-arrow"></div>
+          <div class="tooltip-inner" style="max-width: none; width: auto; padding: 10px; font-size: 14px; white-space: normal;"></div>
+        </div>
+      `
+      })
+    }
+  } catch (error) {
+    console.error('툴팁 초기화 실패:', error)
+  }
 })
 </script>
 
 <style scoped>
-*{
+* {
   font-family: pretendard;
 }
 
 .goal-asset-list-page {
   padding: 20px;
-  background-color: #FAFAFB;
+  background-color: #fafafb;
   min-height: 100vh;
 }
 
@@ -322,7 +393,9 @@ onMounted(async () => {
   text-align: center;
   cursor: pointer;
   font-size: 18px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .goal-card:hover {
@@ -334,7 +407,7 @@ onMounted(async () => {
   margin: 20px 0;
   padding: 15px;
   border-radius: 10px;
-  background: #FAFAFB;
+  background: #fafafb;
 }
 
 .goal-description {
@@ -358,7 +431,7 @@ onMounted(async () => {
 }
 
 .progress {
-  background: linear-gradient(90deg, #ffb9c9,  #ff6584);
+  background: linear-gradient(90deg, #ffb9c9, #ff6584);
   height: 100%;
   border-radius: 10px;
   transition: width 0.3s ease;
@@ -367,19 +440,19 @@ onMounted(async () => {
 .consumption-suggestion {
   text-align: left;
   padding: 20px;
-  color: var(--4, #1D1616);
-font-feature-settings: 'dlig' on;
-font-family: Pretendard;
-font-size: 24px;
-font-style: normal;
-font-weight: 800;
-line-height: 27px; /* 112.5% */
+  color: var(--4, #1d1616);
+  font-feature-settings: 'dlig' on;
+  font-family: Pretendard;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 27px; /* 112.5% */
 }
 
 .goal-cards {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
@@ -391,7 +464,9 @@ line-height: 27px; /* 112.5% */
   border: 2px dashed #ccc;
   font-size: 28px;
   color: #aaa;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .add-goal:hover {
@@ -416,7 +491,7 @@ line-height: 27px; /* 112.5% */
   margin-top: 10px;
 }
 
-.sub-title{
+.sub-title {
   color: var(--3, #414158);
   font-family: Pretendard;
   font-size: 18px;
@@ -426,15 +501,15 @@ line-height: 27px; /* 112.5% */
   letter-spacing: -0.36px;
 }
 
-.main-title{
-  margin-top : 8xp;
+.main-title {
+  margin-top: 8xp;
   color: var(--3, #414158);
   font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 18px;
   font-style: normal;
   font-weight: 700;
-  line-height: 27px; /* 135% */  
+  line-height: 27px; /* 135% */
 }
 
 .loading-spinner {
@@ -450,6 +525,30 @@ line-height: 27px; /* 112.5% */
   color: #ff6584;
   margin-top: 20px;
   animation: fadeInOut 3s ease-in-out;
+}
+
+.tooltip-box {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 1000;
+}
+
+.tooltip-box button {
+  border: none; /* 테두리 제거 */
+  background: none; /* 배경 제거 */
+  padding: 0; /* 여백 제거 */
+  cursor: pointer; /* 클릭 가능한 마우스 커서 */
+  outline: none; /* 버튼 선택 시 나타나는 윤곽선 제거 */
+}
+
+.tooltip-inner {
+  max-width: none; /* 기본 제한을 제거 */
+  width: auto; /* 자동 너비 설정 */
+  padding: 10px; /* 적당한 여백 */
+  white-space: normal; /* 긴 텍스트 줄바꿈 허용 */
+  font-size: 14px; /* 폰트 크기 조정 */
+  font-family: 'Pretendard'; /* 폰트 설정 */
 }
 
 /* 목표 달성 애니메이션 */
@@ -468,4 +567,3 @@ line-height: 27px; /* 112.5% */
   }
 }
 </style>
-

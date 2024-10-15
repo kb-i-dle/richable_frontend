@@ -1,11 +1,7 @@
 <template>
   <div>
     <!-- 소득 리스트 출력 -->
-    <ul>
-      <li v-for="income in incomeList" :key="income.incomeId">
-        {{ income.incomeDate }} - {{ income.type }} - {{ income.price }}원
-      </li>
-    </ul>
+  
 
     <!-- 수정 모달 -->
     <div class="modal fade" id="editAssetModal" tabindex="-1" aria-labelledby="editAssetLabel" aria-hidden="true" ref="modal">
@@ -22,7 +18,7 @@
               <!-- 분류 선택 -->
               <div style="flex: 1;">
                 <label for="assetType" class="form-label" style="font-weight: bold;"></label>
-                <select class="form-select" id="assetType" v-model="type">
+                <select class="form-select" id="assetType" v-model="props.detail.type">
                   <option value="월급">월급</option>
         <option value="비정기 소득">비정기 소득</option>
         <option value="이자 소득">이자 소득</option>
@@ -34,7 +30,7 @@
               <!-- 날짜 선택 -->
               <div style="flex: 1;">
                 <label for="incomeDate" class="form-label" style="font-weight: bold;"></label>
-                <input type="date" class="form-control" id="incomeDate" v-model="incomeDate" placeholder="날짜를 선택해주세요">
+                <input type="date" class="form-control" id="incomeDate" v-model="props.detail.incomeDate" placeholder="날짜를 선택해주세요">
               </div>
             </div>
 
@@ -42,7 +38,7 @@
             <div class="mb-3" style="display: flex;">
               <label for="incomeAmount" class="form-label" style="font-weight: bold; width: 70px; padding-top: 8px;">가격</label>
               <div class="input-group">
-                <input type="text" class="form-control" id="incomeAmount" v-model="price" placeholder="가격을 입력해주세요">
+                <input type="text" class="form-control" id="incomeAmount" v-model="props.detail.price" placeholder="가격을 입력해주세요">
                 <span class="input-group-text">원</span>
               </div>
             </div>
@@ -50,13 +46,13 @@
             <!-- 내용 입력 -->
             <div class="mb-3" style="display: flex;">
               <label for="incomeContent" class="form-label" style="font-weight: bold; width: 70px; padding-top: 8px;">내용</label>
-              <input type="text" class="form-control" id="incomeContent" v-model="contents" placeholder="내용을 입력해주세요">
+              <input type="text" class="form-control" id="incomeContent" v-model="props.detail.contents" placeholder="내용을 입력해주세요">
             </div>
 
             <!-- 메모 입력 -->
             <div class="mb-3" style="display: flex;">
               <label for="incomeMemo" class="form-label" style="font-weight: bold; width: 70px; padding-top: 8px;">메모</label>
-              <input type="text" class="form-control" id="incomeMemo" v-model="memo" placeholder="메모를 입력해주세요">
+              <input type="text" class="form-control" id="incomeMemo" v-model="props.detail.memo" placeholder="메모를 입력해주세요">
             </div>
           </div>
           <div class="modal-footer d-flex justify-content-between">
@@ -98,13 +94,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineExpose, defineEmits } from 'vue';
+import { ref, onMounted, defineExpose, defineEmits, defineProps } from 'vue';
 import { Modal } from 'bootstrap';
 import axiosInstance from '@/AxiosInstance';
 
+// Props로 전달된 detail 객체
+const props = defineProps({ detail: { type: Object, required: true } });
+
 // 이벤트 정의
-const emit = defineEmits(['incomeUpdated', 'incomeDeleted']);
-const incomeList = ref([]);
+const emit = defineEmits(['incomeDeleted','incomeUpdated']);
 
 const modal = ref(null);
 const deleteModal = ref(null);  // 삭제 확인 모달
@@ -121,25 +119,17 @@ const contents = ref('');
 const memo = ref(''); 
 
 // 모달 열기 함수
-const show = (data) => {
-  if (!modalInstance && modal.value) {
-    modalInstance = new Modal(modal.value, {
-      backdrop: 'static',
-      keyboard: true,
-    });
-    modalInstance.show();
-  } else if (modalInstance) {
-    modalInstance.show();
-  }
-
-  // 데이터 초기화 (수정하려는 데이터를 받으면 할당)
-  if (data) {
-    incomeId.value = data.incomeId;  
-    type.value = data.type;
-    incomeDate.value = new Date(data.incomeDate).toISOString().split('T')[0]; 
-    price.value = data.price;
-    contents.value = data.contents;
-    memo.value = data.memo;
+const show = () => {
+  if (props.detail && props.detail.incomeId) {
+    if (!modalInstance && modal.value) {
+      modalInstance = new Modal(modal.value, {
+        backdrop: 'static',
+        keyboard: true,
+      });
+    }
+    modalInstance.show();  // 모달을 화면에 표시
+  } else {
+    console.error('유효하지 않은 소득 데이터입니다:', props.detail);
   }
 };
 
@@ -165,53 +155,30 @@ const closeDeleteModal = () => {
 // 삭제 확인 후 실제 삭제 동작
 const confirmDelete = async () => {
   try {
-    const response = await axiosInstance.delete(`/income/delete/${incomeId.value}`);
-    if (response.data.success) {
-      console.log("소득 삭제 성공:", response.data.response.data);
       if (modalInstance) {
         modalInstance.hide();
       }
       if (deleteModalInstance) {
         deleteModalInstance.hide();
       }
-      isDeleteModalVisible.value = false;
-      emit('incomeDeleted', incomeId.value); // 삭제된 데이터의 ID 전달
-    } else {
-      console.error("소득 삭제 실패:", response.data.message);
-    }
+      emit("incomeDeleted");
   } catch (error) {
     console.error("소득 삭제 실패:", error.response ? error.response.data : error);
   }
 };
 
-
 // 수정 버튼 클릭 시 동작
 const updateIncome = async () => {
   try {
-    const updatedIncomeData = {
-      incomeId: incomeId.value,
-      incomeDate: incomeDate.value,
-      type: type.value,
-      price: parseInt(price.value),
-      contents: contents.value,
-      memo: memo.value,
-    };
-    console.log('전송할 데이터:', updatedIncomeData);  // 데이터 확인용 로그
-    const response = await axiosInstance.put('/income/update', updatedIncomeData);
-    if (response.data.success) {
-      console.log("소득 수정 성공:", response.data.response.data);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-      emit('incomeUpdated', updatedIncomeData); // 수정된 데이터 전달
-    } else {
-      console.error("소득 수정 실패:", response.data);
+    console.log('전송할 데이터:', props.detail);  // 데이터 확인용 로그
+    if (modalInstance) {
+      modalInstance.hide();
     }
+    emit("incomeUpdated");
   } catch (error) {
     console.error("소득 수정 실패:", error.response ? error.response.data : error);
   }
 };
-
 
 // 모달 인스턴스 초기화
 onMounted(() => {

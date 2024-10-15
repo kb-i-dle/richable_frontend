@@ -13,7 +13,7 @@
             <!-- 분류 선택 -->
             <div style="flex: 1;">
               <label for="assetType" class="form-label" style="font-weight: bold;"></label>
-              <select class="form-select" id="assetType" v-model="expCategory">
+              <select class="form-select" id="assetType" v-model="props.detail.expCategory">
                 <option value="식료품 · 비주류음료">식료품 · 비주류음료</option>
                 <option value="주류 · 담배">주류 · 담배</option>
                 <option value="의류 · 신발">의류 · 신발</option>
@@ -33,7 +33,7 @@
             <!-- 날짜 선택 -->
             <div style="flex: 1;">
               <label for="expenseDate" class="form-label" style="font-weight: bold;"></label>
-              <input type="date" class="form-control" id="expenseDate" v-model="date" placeholder="날짜를 선택해주세요">
+              <input type="date" class="form-control" id="expenseDate" v-model="$props.detail.date" placeholder="날짜를 선택해주세요">
             </div>
           </div>
 
@@ -41,7 +41,7 @@
           <div class="mb-3" style="display: flex;">
             <label for="expenseAmount" class="form-label" style="font-weight: bold; width: 70px; padding-top: 8px;">가격</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="expenseAmount" v-model="amount" placeholder="가격을 입력해주세요">
+              <input type="text" class="form-control" id="expenseAmount" v-model="$props.detail.amount" placeholder="가격을 입력해주세요">
               <span class="input-group-text">원</span>
             </div>
           </div>
@@ -49,13 +49,13 @@
           <!-- 내용 입력 -->
           <div class="mb-3" style="display: flex;">
             <label for="expenseContent" class="form-label" style="font-weight: bold; width: 70px; padding-top: 8px;">내용</label>
-            <input type="text" class="form-control" id="expenseContent" v-model="descript" placeholder="내용을 입력해주세요">
+            <input type="text" class="form-control" id="expenseContent" v-model="$props.detail.descript" placeholder="내용을 입력해주세요">
           </div>
 
           <!-- 메모 입력 -->
           <div class="mb-3" style="display: flex;">
             <label for="expenseMemo" class="form-label" style="font-weight: bold; width: 70px; padding-top: 8px;">메모</label>
-            <input type="text" class="form-control" id="expenseMemo" v-model="memo" placeholder="메모를 입력해주세요">
+            <input type="text" class="form-control" id="expenseMemo" v-model="$props.detail.memo" placeholder="메모를 입력해주세요">
           </div>
         </div>
         <div class="modal-footer d-flex justify-content-between">
@@ -96,12 +96,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineExpose, defineEmits } from 'vue';
+import { ref, onMounted, defineExpose, defineEmits, defineProps } from 'vue';
 import { Modal } from 'bootstrap';
 import axiosInstance from '@/AxiosInstance';
 
+const props = defineProps({ detail: { type: Object, required: true } });
+
 // 이벤트 정의
-const emit = defineEmits(['outcomeUpdated', 'outcomeDeleted']);
+const emit = defineEmits(['consumeUpdated', 'consumeDeleted']);
 
 const modal = ref(null);
 const deleteModal = ref(null);
@@ -118,29 +120,18 @@ const descript = ref('');
 const memo = ref('');
 
 // 모달 열기 함수
-const show = (data) => {
-  console.log("데이터 수신:", data);  
-
-  if (!modalInstance && modal.value) {
-    modalInstance = new Modal(modal.value, {
-      backdrop: 'static',
-      keyboard: true,
-    });
-    modalInstance.show();
-  } else if (modalInstance) {
-    modalInstance.show();
-  }
-
-  setTimeout(() => {
-    if (data) {
-      index.value = data.index;
-      expCategory.value = data.expCategory;
-      date.value = data.date;
-      amount.value = data.amount;
-      descript.value = data.descript;
-      memo.value = data.memo;
+const show = () => {
+  if (props.detail && props.detail.index) {
+    if (!modalInstance && modal.value) {
+      modalInstance = new Modal(modal.value, {
+        backdrop: 'static',
+        keyboard: true,
+      });
     }
-  }, 100);
+    modalInstance.show();  // 모달을 화면에 표시
+  } else {
+    console.error('유효하지 않은 소비 데이터입니다:', props.detail);
+  }
 };
 
 // 삭제 확인 모달 열기
@@ -165,75 +156,45 @@ const closeDeleteModal = () => {
 // 삭제 확인 후 실제 삭제 동작
 const confirmDelete = async () => {
   try {
-    const indexValue = typeof index.value === 'object' ? index.value.id : index.value;
-    const response = await axiosInstance.delete(`/outcome/delete/${indexValue}`);
-
-    if (response.data.success) {
-      console.log("소비 삭제 성공:", response.data.response.data);
       if (modalInstance) {
-        modalInstance.hide();  
+        modalInstance.hide();
       }
       if (deleteModalInstance) {
-        deleteModalInstance.hide();  
+        deleteModalInstance.hide();
       }
-      isDeleteModalVisible.value = false;
-
-      // 부모에게 삭제 완료 알림
-      emit('outcomeDeleted');
-    } else {
-      console.error("소비 삭제 실패:", response.data.message);
-    }
+      emit("consumeDeleted");
   } catch (error) {
-    console.error("소비 삭제 실패:", error.response ? error.response.data : error);
+    console.error("소득 삭제 실패:", error.response ? error.response.data : error);
   }
 };
 
-// 소비 수정 요청 (PUT)
+
 const updateOutcome = async () => {
-  const amountValue = isNaN(parseInt(amount.value, 10)) ? 0 : parseInt(amount.value, 10);
-
-  const outcomeData = {
-    index: index.value,
-    expCategory: expCategory.value || "",
-    amount: amountValue,  
-    date: date.value,
-    descript: descript.value || "",
-    memo: memo.value || ""
-  };
-
   try {
-    const response = await axiosInstance.put('/outcome/update', outcomeData);
-    if (response.data.success) {
-      console.log("수정 성공:", response.data.response.data);
-      if (modalInstance) modalInstance.hide();
-
-      // 부모에게 수정 완료 알림
-      emit('outcomeUpdated');
-    } else {
-      console.error("수정 실패:", response.data.message);
-    }
-  } catch (error) {
-    console.error("수정 실패:", error.response ? error.response.data : error);
-    console.log("보내는 데이터:", outcomeData);
-  }
+   
+   console.log('전송할 데이터:', props.detail);  // 데이터 확인용 로그
+   if (modalInstance) {
+     modalInstance.hide();
+   }
+   emit("consumeUpdated");
+ } catch (error) {
+   console.error("소득 수정 실패:", error.response ? error.response.data : error);
+ }
 };
 
-// 컴포넌트가 마운트될 때 모달 초기화
 onMounted(() => {
-  setTimeout(() => {
-    if (modal.value && !modalInstance) {
-      modalInstance = new Modal(modal.value, {
-        backdrop: 'static',
-        keyboard: true,
-      });
-    }
-    if (deleteModal.value && !deleteModalInstance) {
-      deleteModalInstance = new Modal(deleteModal.value, {
-        backdrop: 'static',
-        keyboard: true,
-      });
-    }
-  }, 500);
+  if (modal.value && !modalInstance) {
+    modalInstance = new Modal(modal.value, {
+      backdrop: 'static',
+      keyboard: true,
+    });
+  }
+  if (deleteModal.value && !deleteModalInstance) {
+    deleteModalInstance = new Modal(deleteModal.value, {
+      backdrop: 'static',
+      keyboard: true,
+    });
+  }
 });
 
 defineExpose({ show });

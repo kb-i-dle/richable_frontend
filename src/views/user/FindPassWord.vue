@@ -97,7 +97,7 @@ const verificationCode = ref('')
 const isCodeSent = ref(false)
 const isVerified = ref(false)
 
-const BASE_URL = 'http://localhost:8080/member'
+const BASE_URL =  import.meta.env.VITE_API_BASE_URL + "/member"
 
 const sendVerificationCode = async () => {
   if (email.value && id.value) {

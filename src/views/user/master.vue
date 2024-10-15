@@ -72,7 +72,7 @@ const id = ref('')
 const password = ref('')
 const showPassword = ref(false)
 
-const BASE_URL = 'http://localhost:8080/master'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
@@ -85,7 +85,7 @@ const login = async () => {
   }
 
   try {
-    const response = await axios.post('http://localhost:8080/member/login', {
+    const response = await axios.post(`${BASE_URL}/member/login`, {
       id: id.value,
       password: password.value
     })
@@ -120,7 +120,7 @@ const updateTime = () => {
 
 const updateStock = async () => {
   try {
-    const { data } = await axios.get(`${BASE_URL}/update/stock`)
+    const { data } = await axios.get(`${BASE_URL}/master/update/stock`)
     stockUpdateTime.value = updateTime()
     alert('주식 가격 업데이트 성공!')
   } catch (error) {
@@ -131,7 +131,7 @@ const updateStock = async () => {
 
 const updateCoin = async () => {
   try {
-    const { data } = await axios.get(`${BASE_URL}/update/coin`)
+    const { data } = await axios.get(`${BASE_URL}/master/update/coin`)
     coinUpdateTime.value = updateTime()
     alert('코인 가격 업데이트 성공!')
   } catch (error) {

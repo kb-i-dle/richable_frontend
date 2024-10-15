@@ -12,6 +12,18 @@
     <!-- 도넛 차트 영역 -->
     <div class="d-flex justify-content-center align-items-center mb-5 chart-container1">
       <div class="chart-container2">
+        <div class="tooltip-box">
+              <button
+                class="tool-btn"
+                ref="tooltipButton"
+                type="button"
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+                :title="tooltipMessage"
+              >
+                <font-awesome-icon icon="circle-question" style="font-size: 25px" />
+              </button>
+            </div>
         <div class="donut-chart">
           <svg viewBox="0 0 36 36">
             <path
@@ -39,30 +51,40 @@
       </div>
     </div>
 
-    <div class="cha-title">
-      <div class="cha-title-sub">
-        "{{ nickname }}"님은 <p style="display: inline; color: #ff0062;">{{ tendency }}</p> 성향 입니다.
-      </div>
-      <div class="cha-title-main">{{ category }} 상품에 여유자금으로 투자하기</div>
-    </div>
-
-    <!-- 로딩 상태에 따른 투자 성향 및 카테고리 정보 표시 -->
+    <!-- 투자 성향 및 상품 추천 -->
     <div v-if="isLoadingTendency" class="spinner-container">
-      <div class="spinner scroll-wrapper"></div>
+      <div class="spinner"></div>
     </div>
-    <div v-else class="cha-title">
-      <div class="cha-title-sub">
-        "{{ nickname }}"님의 <p style="display: inline; color: #ff0062;">{{ tendency }}</p> 성향을 기반으로 추천드려요.
+    <div v-else>
+      <div class="cha-title">
+        <div class="cha-title-sub">
+          "{{ nickname }}"님은 <p style="display: inline; color: #ff0062;">{{ tendency }}</p>이군요.
+        </div>
+        <div class="cha-title-main">
+          <template v-if="tendency === '공격형'">
+            {{ tendency }} 이므로 <span style="color: #ff0062;">채권/예금</span> 상품을 추천해드려요.
+          </template>
+          <template v-else-if="tendency === '안정형'">
+            {{ tendency }} 이므로 <span style="color: #ff0062;">주식/코인</span> 상품을 추천해드려요.
+          </template>
+          <template v-else>
+            다양한 상품을 추천해드려요.
+          </template>
+        </div>
       </div>
-      <div class="cha-title-main">{{ category }} 상품에 여유자금으로 투자하기</div>
-    </div>
 
-    <!-- 스크롤 가능한 추천 상품 리스트 -->
-    <div v-else class="scroll-wrapper">
-      <button @click="scrollLeft">
-        <font-awesome-icon style="color: #fff;" :icon="['fas', 'chevron-left']" />
-      </button>
-      <div class="scroll-container" ref="scrollContainer">
+      <!-- 슬라이드 가능한 추천 상품 리스트 (마우스 드래그 지원) -->
+      <div
+        class="scroll-container"
+        ref="scrollContainer"
+        @mousedown="startDragging"
+        @mousemove="onDragging"
+        @mouseup="stopDragging"
+        @mouseleave="stopDragging"
+        @touchstart="startDragging"
+        @touchmove="onDragging"
+        @touchend="stopDragging"
+      >
         <div class="scroll-item" v-for="(product, index) in recommendedProducts" :key="index">
           <div class="custom-card">
             <div class="card-body">
@@ -76,9 +98,6 @@
           </div>
         </div>
       </div>
-      <button @click="scrollRight">
-        <font-awesome-icon style="color: #fff;" :icon="['fas', 'chevron-right']" />
-      </button>
     </div>
   </div>
 </template>
@@ -86,6 +105,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axiosInstance from '@/AxiosInstance';
+import { Chart, registerables, Tooltip } from 'chart.js'
+import { Tooltip as BootstrapTooltip } from 'bootstrap'
 
 const availableCash = ref(0); // 여유 자금
 const availablePercentage = ref(0); // 여유 자금 비율
@@ -97,23 +118,28 @@ const nickname = ref(''); // 닉네임 데이터 추가
 const isLoadingTendency = ref(true);
 
 const scrollContainer = ref(null);
+const isDragging = ref(false);
+const startX = ref(0);
+const scrollLeft = ref(0);
 
-const scrollLeft = () => {
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollBy({
-      left: -300, // 왼쪽으로 스크롤할 거리
-      behavior: 'smooth',
-    });
-  }
+// 마우스 드래그 시작 시 호출
+const startDragging = (e) => {
+  isDragging.value = true;
+  startX.value = e.pageX || e.touches[0].pageX;
+  scrollLeft.value = scrollContainer.value.scrollLeft;
 };
 
-const scrollRight = () => {
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollBy({
-      left: 300, // 오른쪽으로 스크롤할 거리
-      behavior: 'smooth',
-    });
-  }
+// 마우스 드래그 중일 때 호출
+const onDragging = (e) => {
+  if (!isDragging.value) return;
+  const x = e.pageX || e.touches[0].pageX;
+  const walk = (x - startX.value) * 1.5; // 드래그할 때 이동 속도
+  scrollContainer.value.scrollLeft = scrollLeft.value - walk;
+};
+
+// 마우스 드래그 끝났을 때 호출
+const stopDragging = () => {
+  isDragging.value = false;
 };
 
 // 위험도 가져오기 함수
@@ -218,13 +244,17 @@ const calculatePercentage = (cash) => {
 
 <style scoped>
 * {
+  box-sizing: border-box; /* 모든 요소에 box-sizing 적용 */
+}
+
+* {
   color: #19181d;
   font-family: 'Pretendard', sans-serif;
-  max-width: 1704px;
 }
 
 .container {
-  margin: 80px;
+  margin: 0; /* 마진을 0으로 설정하여 여백 제거 */
+  padding: 20px; /* 패딩 추가 */
 }
 
 .total-asset {
@@ -238,34 +268,25 @@ const calculatePercentage = (cash) => {
 .total-asset-title {
   margin-top: 8xp;
   color: var(--4, #1D1616);
-  font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 18px;
-  font-style: normal;
   font-weight: 700;
   line-height: 27px;
 }
 
 .total-asset-sub {
   text-align: center;
-  font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 18px;
-  font-style: normal;
   font-weight: 500;
   line-height: 32px;
-  letter-spacing: -0.8px;
 }
 
 .highlight {
   color: var(--Primary-30, #FF0062);
-  font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 20px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 32px;
-  letter-spacing: -0.8px;
 }
 
 .chart-container1 {
@@ -279,10 +300,12 @@ const calculatePercentage = (cash) => {
 }
 
 .chart-container2 {
+  position:relative;
   width: 200px;
   height: 200px;
   position: relative;
 }
+
 .donut-chart {
   width: 100%;
   height: 100%;
@@ -322,6 +345,7 @@ const calculatePercentage = (cash) => {
   font-size: 20px;
   color: var(--3, #414158);
 }
+
 .legend-container {
   margin-top: 20px;
 }
@@ -357,34 +381,26 @@ const calculatePercentage = (cash) => {
   color: var(--4, #1D1616);
   font-family: Pretendard;
   font-size: 18px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 150%;
-  letter-spacing: -0.36px;
 }
 
 .cha-title-main {
   color: var(--4, #1D1616);
   font-family: Pretendard;
   font-size: 18px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 150%;
-  letter-spacing: -0.36px;
 }
 
 .custom-card {
   height: 180px;
   display: flex;
-  width: 300px;
-  padding: 30px;
+  width: 100%;
+  padding: 20px;
   flex-direction: column;
   gap: 17px;
-  flex-shrink: 0;
   border-radius: 12px;
   background-color: #f9f9f9;
   text-align: left;
-  border-radius: 20px;
   background: #FFF;
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.10);
 }
@@ -392,12 +408,9 @@ const calculatePercentage = (cash) => {
 .risk-level {
   color: var(--2, #8A8AA8);
   text-align: left;
-  font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 16px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 27px;
 }
 
 .risk-medium {
@@ -414,72 +427,47 @@ const calculatePercentage = (cash) => {
 
 .product-name {
   color: var(--3, #414158);
-  font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 18px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 27px;
 }
 
 .product-price {
   color: #19181d;
-  font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 20px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 27px;
 }
 
 .unit-price {
   color: var(--2, #8A8AA8);
   text-align: right;
-  font-feature-settings: 'dlig' on;
   font-family: Pretendard;
   font-size: 16px;
-  font-style: normal;
   font-weight: 400;
-  line-height: 27px;
-}
-
-.scroll-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  height: 250px;
 }
 
 .scroll-container {
   display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  padding: 20px 50px;
-  margin: 20px;
+  overflow-x: auto; /* 스크롤 가능하도록 설정 */
+  gap: 10px; /* 카드 사이 여백을 최소화 */
+  padding: 10px; /* 컨테이너 패딩 조정 */
+  scroll-behavior: smooth; /* 부드러운 스크롤 */
+  cursor: grab;
+}
+
+.scroll-container:active {
+  cursor: grabbing;
 }
 
 .scroll-item {
-  flex: 0 0 280px;
-  scroll-snap-align: start;
-  margin-right: 20px;
+  flex: 0 0 calc(25% - 10px); /* 한 화면에 4개 카드가 정확히 들어가도록 크기 조정 */
+  min-width: calc(25% - 10px); /* 카드 너비 조정 */
+  scroll-snap-align: start; /* 스크롤 맞춤 */
 }
 
-button {
-  background-color: #ff0062;
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-  width: 55px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
+.scroll-container::-webkit-scrollbar {
+  display: none; /* 스크롤바 숨김 */
 }
 
 button:hover {
@@ -502,12 +490,117 @@ button:hover {
   animation: spin 1s linear infinite;
 }
 
+.tooltip-inner {
+  white-space: nowrap !important;
+}
+
+.tooltip-box {
+  position: absolute;
+  right: -200px;
+  top: 0;
+  z-index: 10;
+}
+
+.tooltip-box button {
+  border: none; /* 테두리 제거 */
+  background: none; /* 배경 제거 */
+  padding: 0; /* 여백 제거 */
+  cursor: pointer; /* 클릭 가능한 마우스 커서 */
+  outline: none; /* 버튼 선택 시 나타나는 윤곽선 제거 */
+}
+
+
+.tooltip-inner {
+  font-family: 'Pretendard';
+  max-width: 400px !important;
+  white-space: normal !important;
+  font-size: 12px;
+}
+
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    margin: 80px;
+  }
+
+  .scroll-item {
+    flex: 0 0 calc(25% - 10px);
+  }
+
+  .custom-card {
+    width: 100%;
+  }
+
+  .chart-container1 {
+    height: 400px;
+  }
+}
+
+/* 태블릿용 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container {
+    margin: 40px;
+  }
+
+  .scroll-item {
+    flex: 0 0 calc(50% - 10px);
+  }
+
+  .custom-card {
+    width: 100%;
+  }
+
+  .chart-container1 {
+    height: 300px;
+  }
+}
+
+/* 모바일용 */
+@media (max-width: 767px) {
+  .container {
+    margin: 20px;
+  }
+
+  .total-asset {
+    padding: 15px;
+    height: auto;
+  }
+
+  .scroll-item {
+    flex: 0 0 calc(80% - 10px); /* 모바일에서는 두 개씩 보여지도록 */
+  }
+
+  .custom-card {
+    width: 100%;
+  }
+
+  .chart-container1 {
+    height: 250px;
+  }
+
+  .highlight {
+    font-size: 16px;
+  }
+
+  .total-asset-sub {
+    font-size: 14px;
+  }
+
+  .cha-title-sub {
+    font-size: 14px;
+  }
+
+  .cha-title-main {
+    font-size: 16px;
   }
 }
 </style>

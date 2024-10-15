@@ -1,30 +1,31 @@
 <template>
-  <!-- 소비 상세 조회 모달 -->
-  <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true" ref="modal">
+  <div class="modal fade" id="editAssetModal" tabindex="-1" aria-labelledby="editAssetLabel" aria-hidden="true" ref="modal">
     <div class="modal-dialog">
-      <div class="modal-content">
+      <!-- 삭제 모달이 열리면 수정 모달에 흐림 효과 적용 -->
+      <div class="modal-content" :class="{ 'blur-background': isDeleteModalVisible }">
         <div class="modal-header">
-          <h5 class="modal-title" id="detailModalLabel" style="font-weight: bold;">소비 상세 조회</h5>
+          <h5 class="modal-title" id="editAssetLabel" style="font-weight: bold;">소비 상세</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+       
         <div class="modal-body" style="padding:20px; padding-bottom: 12px;">
           <!-- 분류 -->
           <div class="mb-3" style="display: flex; align-items: center;">
-            <label for="expenseType" class="form-label" style="font-weight: bold; width: 70px; padding-top: 0;">분류</label>
-            <input type="text" class="form-control" readonly v-model="detail.expCategory" />
+            <label for="incomeType" class="form-label" style="font-weight: bold; width: 70px; padding-top: 0;">분류</label>
+            <input type="text" class="form-control" readonly v-model="props.detail.expCategory" />
           </div>
 
           <!-- 날짜 -->
           <div class="mb-3" style="display: flex; align-items: center;">
-            <label for="expenseDate" class="form-label" style="font-weight: bold; width: 70px; padding-top: 0;">날짜</label>
-            <input type="text" class="form-control" readonly v-model="detail.date" />
+            <label for="incomeDate" class="form-label" style="font-weight: bold; width: 70px; padding-top: 0;">날짜</label>
+            <input type="text" class="form-control" readonly v-model="props.detail.date" />
           </div>
 
           <!-- 가격 -->
           <div class="mb-3" style="display: flex;">
             <label class="form-label" style="font-weight: bold; width: 70px;">가격</label>
             <div class="input-group" style="flex-grow: 1;">
-              <input type="text" class="form-control" readonly v-model="detail.amount" />
+              <input type="text" class="form-control" readonly v-model="props.detail.amount" />
               <span class="input-group-text">원</span>
             </div>
           </div>
@@ -32,13 +33,13 @@
           <!-- 내용 -->
           <div class="mb-3" style="display: flex;">
             <label class="form-label" style="font-weight: bold; width: 70px;">내용</label>
-            <input type="text" class="form-control" readonly v-model="detail.descript" />
+            <input type="text" class="form-control" readonly v-model="props.detail.descript" />
           </div>
 
           <!-- 메모 -->
           <div class="mb-3" style="display: flex;">
             <label class="form-label" style="font-weight: bold; width: 70px;">메모</label>
-            <input type="text" class="form-control" readonly v-model="detail.memo" />
+            <input type="text" class="form-control" readonly v-model="props.detail.memo" />
           </div>
         </div>
 
@@ -55,65 +56,56 @@
       </div>
     </div>
   </div>
-  <ConsumeUpdateModal ref="updateModal" />
+
 </template>
 
 <script setup>
-import { ref, onMounted, defineExpose, defineProps } from 'vue';
+import { ref, defineProps, defineExpose, defineEmits } from 'vue';
 import { Modal } from 'bootstrap';
-import axios from 'axios';
-import ConsumeUpdateModal from '@/components/modal/budget/ConsumeUpdateModal.vue';
-import axiosInstance from '@/AxiosInstance';
 
+// 이벤트 정의
 const props = defineProps({ detail: { type: Object, required: true } });
+const emit = defineEmits(['close']);
 
 const modal = ref(null);
 let modalInstance = null;
-const updateModal = ref(null); // ConsumeUpdateModal 참조
-
-// 소비 상세 조회 데이터 불러오기
-const fetchOutcomeDetail = async (index) => {
-  try {
-    const response = await axiosInstance.get(`/outcome/detail/${index}`);
-    if (response.data.success) {
-      // 데이터가 성공적으로 반환되면 props.detail 업데이트
-      props.detail = response.data.response.data;
-    } else {
-      console.error('소비 상세 조회 실패:', response.data);
-    }
-  } catch (error) {
-    console.error('소비 상세 조회 중 오류 발생:', error);
-  }
-};
 
 // 모달 열기 함수
-const show = (index) => {
-  fetchOutcomeDetail(index); // 모달이 열릴 때 소비 상세 조회
+const show = (Index) => {  
+
   if (!modalInstance && modal.value) {
     modalInstance = new Modal(modal.value, {
       backdrop: 'static',
-      keyboard: false,
+      keyboard: true,
     });
     modalInstance.show();
   } else if (modalInstance) {
     modalInstance.show();
-  }
+}
 };
 
-// 소비 수정 모달 열기 함수
 const editEntry = () => {
-  // 모달 닫기
-  if (modalInstance) {
+  if(modalInstance) {
     modalInstance.hide();
   }
-
-  // 수정 모달 열기
-  if (updateModal.value && updateModal.value.show) {
-    updateModal.value.show(props.detail);  // 소비 수정 모달에 데이터 전달
-  } else {
-    console.log('ConsumeUpdateModal이 로드되지 않음');
-  }
+  emit('close');
 };
 
 defineExpose({ show });
 </script>
+
+<style scoped>
+.modal-content {
+  border-radius: 10px;
+}
+
+.btn-pink {
+    background-color: #ff007f;
+}
+
+/* 삭제 모달이 열리면 흐리게 표시 */
+.blur-background {
+  backdrop-filter: blur(5px);
+  opacity: 0.6;
+}
+</style>

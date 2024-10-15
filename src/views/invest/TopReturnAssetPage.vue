@@ -84,20 +84,16 @@ let allAssets = ref([])
 // 필터 클릭 시 실행되는 함수
 const filterAssets = async (filter) => {
   selectedFilter.value = filter;
-  let url = 'http://localhost:8080/invest/highreturn'; // 전체 조회
+  let url = '/invest/highreturn'; // 전체 조회
 
   if (filter === '주식') {
-    url = 'http://localhost:8080/invest/highreturn/stock';
+    url = '/invest/highreturn/stock';
   } else if (filter === '코인') {
-    url = 'http://localhost:8080/invest/highreturn/coin';
+    url = '/invest/highreturn/coin';
   }
 
   try {
-    const response = await axios.get(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`  // JWT 토큰을 Authorization 헤더에 추가
-      }
-    });
+    const response = await axiosInstance.get(url);
     if (response.data.success) {
       allAssets.value = response.data.response.data.map(item => ({
         name: item.name,
@@ -315,5 +311,67 @@ td {
   font-weight: 500;
   line-height: 150%;
   letter-spacing: -0.48px;
+}
+/* 태블릿용 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .top-return-asset-page {
+    padding: 15px;
+  }
+
+  .filters {
+    justify-content: space-between;
+  }
+
+  .custom-card {
+    height: 180px;
+    width: 300px;
+    padding: 40px 15px;
+  }
+
+  .rank {
+    font-size: 36px;
+  }
+
+  .table th, .table td {
+    font-size: 16px;
+  }
+}
+
+/* 모바일용 */
+@media (max-width: 767px) {
+  .top-return-asset-page {
+    padding: 10px;
+  }
+
+  .filters {
+    justify-content: space-around;
+  }
+
+  .custom-card {
+    height: 150px;
+    width: 240px;
+    padding: 30px 10px;
+  }
+
+  .rank {
+    font-size: 28px;
+  }
+
+  .name {
+    font-size: 16px;
+  }
+
+  .type {
+    font-size: 14px;
+  }
+
+  .price, .return-rate {
+    font-size: 16px;
+  }
+
+  .table th, .table td {
+    font-size: 14px;
+    padding: 10px;
+  }
 }
 </style>

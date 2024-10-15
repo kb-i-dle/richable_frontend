@@ -9,7 +9,7 @@ dotenv.config()
 const apiBaseUrl = process.env.VITE_API_BASE_URL
 // Vite 설정
 export default defineConfig({
-  base: '/',  
+  base: '/',   
   plugins: [vue(), vueDevTools()],
   resolve: {
     alias: {
@@ -21,7 +21,7 @@ export default defineConfig({
       '/api': {
         target: apiBaseUrl,  // 정의된 변수 사용
         changeOrigin: true, // 필요시 추가
-        secure: false, // 필요시 추가
+        secure: true, // 필요시 추가
         rewrite: (path) => path.replace(/^\/api/, '')  // '/api'를 서버로 보내기 전에 제거
 
       },

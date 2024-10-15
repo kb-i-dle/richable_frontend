@@ -27,7 +27,7 @@
             <!-- 제목 표시 -->
           </div>
           <div class="mb-3" style="display: flex; justify-content: space-between">
-            <label class="form-label" style="font-weight: bold">목표량</label>
+            <label class="form-label" style="font-weight: bold; white-space: nowrap; margin-right: 10px;">목표량</label>
             <div class="input-group" style="text-align: right">
               <!-- 사용자 입력 필드 -->
               <input v-model="goalDetail.amount" type="number" class="form-control" />
