@@ -35,7 +35,7 @@
     <div class="tab-content">
       <div class="tab-page" v-if="selectedTab === 'tab1'">
         <div class="total-asset">
-          <div class="asset-title">{{ auth.userProfile.data.nickname }}님의 총 금융 자산 현황 😎</div>
+          <div class="asset-title">김리치님의 총 금융 자산 현황 😎</div>
           <div class="asset-amount">{{ financeTotalAmount.toLocaleString() }} 원</div>
         </div>
         <div class="asset-list">
@@ -153,7 +153,7 @@
 
       <div class="tab-page" v-if="selectedTab === 'tab2'">
         <div class="total-asset">
-          <div class="asset-title">{{ auth.userProfile.data.nickname }}님의 총 현물 자산 현황 😎</div>
+          <div class="asset-title">김리치님의 총 현물 자산 현황 😎</div>
           <div class="asset-amount">{{ spotTotalAmount.toLocaleString() }} 원</div>
         </div>
         <div class="asset-list">
@@ -250,7 +250,6 @@ import AssetUpdateModal from '../../components/modal/asset/AssetUpdateModal.vue'
 import AssetCheckModal from '../../components/modal/asset/AssetCheckModal.vue'
 import TangibleAssetCreateModal from '../../components/modal/asset/TangibleAssetCreateModal.vue'
 import TangibleAssetUpdateModal from '../../components/modal/asset/TangibleAssetUpdateModal.vue'
-import { useAuthStore } from '@/stores/auth'
 
 // Chart.js에 필요한 컴포넌트(컨트롤러, 요소, 플러그인) 등록
 Chart.register(PieController, ArcElement, Tooltip, Legend)
@@ -283,8 +282,6 @@ const paginatedAssets = computed(() => {
 
   return latestAssets.value.slice(start, end)
 })
-
-const auth = useAuthStore();
 
 // 총 슬라이드 개수 계산
 const maxSlide = computed(() => Math.ceil(tangibleAssets.value.length / itemsPerPage))
@@ -333,7 +330,7 @@ const renderPieChart = async () => {
             bondAssetAmount?.value,
             coinAssetAmount?.value
           ],
-          backgroundColor: ['#C30044', '#FF0062', '#DA0052', '#FFF2F6']
+          backgroundColor: ['#C30044', '#dda0dd', '#c71585', '#FFF2F6']
         }
       ]
     },
@@ -376,7 +373,7 @@ const renderPieChart2 = async () => {
             spotLuxuryAmount?.value,
             spotEtcAmount?.value
           ],
-          backgroundColor: ['#C30044', '#FF0062', '#DA0052', '#FFF2F6', '#DA0052']
+          backgroundColor: ['#C30044', '#dda0dd', '#c71585', '#FFF2F6', '#DA0052']
         }
       ]
     },
@@ -679,7 +676,6 @@ const getSpotList = async () => {
 
 // 5. 초기 설정
 onMounted(() => {
-  auth.fetchUserProfile();
   updateTooltipMessage()
   fetchFinanceAssetList() // 총 금융 자산 현황 조회
   fetchFinanceAmount() // 금융 자산별 합 조회
