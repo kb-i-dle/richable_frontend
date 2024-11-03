@@ -200,13 +200,17 @@ KOSIS 데이터를 통해 월 별 소비를 대한민국 평균과 비교, 초�
 ## 5. ERD
 ![ERD](https://github.com/user-attachments/assets/11f86a5a-7d58-42fd-908e-1abc9757219b)
 
+<br/>
+
 대부분의 테이블은 정규화를 했지만, <br/>
 1. 금융상품의 가격이 날마다 업데이트 되는 테이블 <br/>
-2. 사용자의 금융 레포트를 과거 값과 비교해야 되는 테이블 <br/>
+2. 사용자의 금융 레포트를 과거 값과 비교해야 되는 테이블은 <br/>
 은 비정규화 되어있는 대신에 날짜를 이용하여 파티션을 설정했습니다. <br/>
 
 사용자 금융 레포트 정보가 있는 테이블은 ELT 방식으로, 데이터 정합성을 위해 특정 이벤트 마다 업데이트 되도록 설정해놨습니다. <br/>
 금융 상품 테이블은 스케줄러를 이용하여 날마다 자동으로 업데이트 되도록 하였습니다. 👉 [테이블 명세 바로가기](https://docs.google.com/spreadsheets/d/1uoVMWnJXXPUVs8oZUqX_1JZZOciEoYRK/edit?pli=1&gid=985508695#gid=985508695)
+
+<br/>
 
 ![테이블명세](https://github.com/user-attachments/assets/581567a5-3200-4528-aad1-9bedc0bbaf7b)
 
