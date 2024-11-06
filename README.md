@@ -227,6 +227,10 @@ KOSIS 데이터를 통해 월 별 소비를 대한민국 평균과 비교, 초�
 <br/>
 
 ## 8. API 명세서
+👉 [API 명세서 바로가기](https://carbonated-force-8e2.notion.site/API-ca71a534b7a044f39539d8ba4f1f8665)
+
+![API 문서](https://github.com/user-attachments/assets/521ebd01-7291-4393-87e3-abee20a048fa)
+
 
 <br/>
 
@@ -414,7 +418,9 @@ ex) 240919 홍길동 로그인 기능 추가
 <br/>
 
 ## 10. 발표 자료
+💾 [Richable 발표 자료 다운받기](https://github.com/user-attachments/files/17645870/P1-1.Richable.pdf)
 
+<img width="600" alt="발표자료 미리보기" src="https://github.com/user-attachments/assets/61a53960-b8e7-4444-90a3-ee833359678f">
 
 <br/><br/><br/><br/><br/><br/>
 <hr/>
